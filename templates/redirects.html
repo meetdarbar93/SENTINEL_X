@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Trajectory Inspector | SENTINEL-X{% endblock %}
+{% block breadcrumb %}05 // TRAJECTORY INSPECTOR{% endblock %}
+
+{% block content %}
+<!-- Top Cinematic Horror Hero Banner -->
+<div class="horror-module-banner mb-4">
+  <div class="module-banner-backdrop">
+    <img src="{{ url_for('static', filename='images/horror_corridor.jpg') }}" alt="Endless Subterranean Corridor" class="module-banner-img ken-burns-subtle">
+    <div class="module-banner-overlay"></div>
+  </div>
+  <div class="module-banner-content">
+    <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
+      <div>
+        <div class="vertical-classified-tag mb-1">AUDIT VECTOR 05 // HTTP HOP-BY-HOP RECONNAISSANCE</div>
+        <h1 class="horror-glitch horror-font mb-1"><i class="bi bi-bezier2 text-blood"></i> TRAJECTORY INSPECTOR</h1>
+        <p class="text-ash mb-0" style="max-width: 650px;">Hop-by-hop HTTP trajectory auditor with strict SSRF boundary enforcement, loop detection, and unencrypted protocol downgrade alerts.</p>
+      </div>
+      <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+        <span class="system-telemetry-pill">
+          <i class="bi bi-shield-check text-blood"></i> SSRF GUARD ACTIVE
+        </span>
+        <span class="system-telemetry-pill">
+          <i class="bi bi-signpost-split text-ash"></i> MAX 5 HOPS
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Oversized Brutalist Input Area -->
+<div class="horror-card mb-4 position-relative overflow-hidden" style="border-left: 3px solid var(--blood-crimson);">
+  <div class="horror-scan-laser"></div>
+  
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="font-monospace text-ash small text-uppercase letter-spacing-1">
+      <i class="bi bi-compass text-blood"></i> ENTER TARGET TRAJECTORY DESTINATION
+    </span>
+    <span class="badge font-monospace text-blood" style="background: rgba(181,18,27,0.15); border: 1px solid var(--border-hairline);">
+      RFC 1918 PROTECTED
+    </span>
+  </div>
+
+  <form id="redirectForm" onsubmit="event.preventDefault(); runRedirectAudit();">
+    <div class="input-group mb-3">
+      <input type="text" id="targetRedirectInput" class="form-control font-monospace py-2.5 px-3" placeholder="ENTER TARGET URL (e.g. http://google.com or bit.ly/3sample...)" autocomplete="off" required style="font-size: 1.05rem;">
+      <button type="submit" id="inspectRedirectBtn" class="horror-btn px-4">
+        <i class="bi bi-bezier2"></i> Trace Hops
+      </button>
+      <button type="button" class="horror-btn horror-btn-outline px-3" onclick="clearRedirectForm()">
+        <i class="bi bi-x-lg"></i> Clear
+      </button>
+    </div>
+  </form>
+
+  <div class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top border-horror">
+    <span class="text-ash small me-1 font-monospace"><i class="bi bi-lightning-charge text-blood"></i> PRESET VECTORS:</span>
+    <button class="preset-pill" onclick="setRedirectTarget('http://google.com')">http://google.com (HTTP &rarr; HTTPS)</button>
+    <button class="preset-pill" onclick="setRedirectTarget('http://github.com')">http://github.com (Canonical redirect)</button>
+    <button class="preset-pill" onclick="setRedirectTarget('http://127.0.0.1:8080')">Loopback (SSRF Policy Block)</button>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="redirectLoadingOverlay" class="horror-card text-center p-5 mb-4 position-relative overflow-hidden" style="display: none; background: #0E0809; border: 1px solid #B5121B;">
+  <div class="horror-scan-laser"></div>
+  <i class="bi bi-bezier2 fs-1 text-blood d-block mb-3 threat-pulse"></i>
+  <h3 class="text-bone font-headline mb-2">TRACING REDIRECT CHAIN HOP-BY-HOP...</h3>
+  <div class="text-ash small font-monospace">Enforcing SSRF boundary on each destination &bull; Resolving DNS &bull; Checking downgrade vectors</div>
+</div>
+
+<!-- Results Section -->
+<div id="redirectResultsSection" style="display: none;">
+  <!-- Overview Summary Monolith -->
+  <div class="horror-card mb-4" style="border-top: 2px solid var(--blood-crimson);">
+    <div class="row align-items-center g-3">
+      <div class="col-12 col-lg-8">
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex align-items-baseline gap-2 flex-wrap">
+            <span class="text-ash small text-uppercase font-monospace" style="min-width: 130px;">ORIGIN SOURCE:</span>
+            <span class="code-snippet font-monospace py-1 px-2.5" id="redirStartUrl">-</span>
+          </div>
+          <div class="d-flex align-items-baseline gap-2 flex-wrap">
+            <span class="text-ash small text-uppercase font-monospace" style="min-width: 130px;">FINAL TARGET:</span>
+            <span class="code-snippet text-blood fw-bold font-monospace py-1 px-2.5" id="redirFinalUrl">-</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-4 text-lg-end">
+        <div class="d-inline-flex flex-column align-items-lg-end gap-1">
+          <span class="risk-badge low fs-6 py-1.5 px-3" id="redirSecurityBadge">SAFE REDIRECT</span>
+          <span class="font-monospace small text-ash mt-1" id="redirHopsCountLabel">0 hops</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warning Banners if any -->
+  <div id="redirectWarningsContainer" class="mb-4"></div>
+
+  <!-- Connected Trajectory Node Flowchart -->
+  <div class="horror-card mb-4">
+    <div class="horror-card-header">
+      <h5 class="horror-card-title text-blood">
+        <i class="bi bi-diagram-3-fill text-blood"></i> Connected Trajectory Node Flowchart
+      </h5>
+      <span class="badge font-monospace text-blood" id="redirSequenceBadge" style="background: rgba(181,18,27,0.15); border: 1px solid var(--border-hairline);">Chain Nominal</span>
+    </div>
+
+    <div id="redirectStepsContainer" class="d-flex flex-column gap-3 ps-4 my-2" style="border-left: 2px solid var(--blood-crimson); position: relative;">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentRedirectData = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetParam = urlParams.get("target");
+  if (targetParam) {
+    setRedirectTarget(targetParam);
+    runRedirectAudit();
+  }
+});
+
+function setRedirectTarget(url) {
+  const input = document.getElementById("targetRedirectInput");
+  if (input) input.value = url;
+}
+
+function clearRedirectForm() {
+  const input = document.getElementById("targetRedirectInput");
+  if (input) input.value = "";
+  document.getElementById("redirectResultsSection").style.display = "none";
+}
+
+async function runRedirectAudit() {
+  const input = document.getElementById("targetRedirectInput");
+  const rawUrl = input.value.trim();
+
+  if (!rawUrl) {
+    showHorrorToast("Please provide a URL to trace.", "warning");
+    input.focus();
+    return;
+  }
+
+  const loader = document.getElementById("redirectLoadingOverlay");
+  const results = document.getElementById("redirectResultsSection");
+  const btn = document.getElementById("inspectRedirectBtn");
+
+  loader.style.display = "block";
+  results.style.display = "none";
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch("/api/redirects/inspect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: rawUrl })
+    });
+
+    const json = await resp.json();
+
+    if (json.success && json.data) {
+      currentRedirectData = json.data;
+      renderRedirectResults(json.data);
+      showHorrorToast(`Redirect trace completed: ${json.data.total_hops} hop(s).`, "success");
+    } else {
+      showHorrorToast(json.error || "Redirect inspection failed.", "danger");
+    }
+  } catch (err) {
+    showHorrorToast(`Network error: ${err.message}`, "danger");
+  } finally {
+    loader.style.display = "none";
+    btn.disabled = false;
+  }
+}
+
+function renderRedirectResults(data) {
+  document.getElementById("redirStartUrl").innerText = data.start_url;
+  document.getElementById("redirFinalUrl").innerText = data.final_url;
+  document.getElementById("redirHopsCountLabel").innerText = `${data.total_hops} Hop(s) Traversed`;
+
+  // Badges & Warnings
+  const secBadge = document.getElementById("redirSecurityBadge");
+  const warningsContainer = document.getElementById("redirectWarningsContainer");
+  warningsContainer.innerHTML = "";
+
+  const isSsrfBlocked = (data.chain && data.chain.some(h => h.is_ssrf_blocked)) || 
+                        (data.warnings && data.warnings.some(w => w.toLowerCase().includes("ssrf")));
+
+  if (isSsrfBlocked) {
+    secBadge.className = "risk-badge critical";
+    secBadge.innerText = "SSRF BLOCKED";
+    warningsContainer.innerHTML += `
+      <div class="alert alert-danger py-2.5 small" style="background:#240C0E; border:1px solid #B5121B; color:#F1EAEA;">
+        <i class="bi bi-shield-lock-fill fs-5 me-2 text-blood"></i> <strong>SSRF Boundary Enforced:</strong> Connection halted. Destination targets private, loopback, or cloud-metadata address space.
+      </div>
+    `;
+  } else if (data.has_downgrade) {
+    secBadge.className = "risk-badge critical";
+    secBadge.innerText = "PROTOCOL DOWNGRADE";
+    warningsContainer.innerHTML += `
+      <div class="alert alert-danger py-2.5 small" style="background:#240C0E; border:1px solid #B5121B; color:#F1EAEA;">
+        <i class="bi bi-radioactive fs-5 me-2 text-blood"></i> <strong>Critical Protocol Downgrade Detected:</strong> One or more hops transitioned from HTTPS to unencrypted HTTP.
+      </div>
+    `;
+  } else if (data.has_loop) {
+    secBadge.className = "risk-badge medium";
+    secBadge.innerText = "REDIRECT LOOP";
+    warningsContainer.innerHTML += `
+      <div class="alert alert-warning py-2.5 small text-dark" style="background:#2A1E0D; border:1px solid #C69B42; color:#F1EAEA;">
+        <i class="bi bi-arrow-repeat fs-5 me-2 text-warning"></i> <strong>Redirect Loop Detected:</strong> The trajectory repeated an earlier URL state.
+      </div>
+    `;
+  } else {
+    secBadge.className = "risk-badge low";
+    secBadge.innerText = "TRAJECTORY NOMINAL";
+  }
+
+  // Render Connected Node Diagram
+  const stepsContainer = document.getElementById("redirectStepsContainer");
+  const chain = data.chain || [];
+  stepsContainer.innerHTML = chain.map((hop, idx) => {
+    const isFinal = (idx === chain.length - 1);
+    const bulletColor = isFinal ? '#E32636' : '#B5121B';
+    return `
+      <div class="horror-inset-box p-3 rounded" style="position: relative; border-left: 2px solid ${isFinal ? '#E32636' : '#650B12'};">
+        <!-- Node Bullet on Timeline Line -->
+        <div style="position: absolute; left: -25px; top: 18px; width: 14px; height: 14px; border-radius: 50%; background: ${bulletColor}; box-shadow: 0 0 12px ${bulletColor}; border: 2px solid #050505;"></div>
+        
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge ${isFinal ? 'bg-danger text-white' : 'font-monospace text-blood'}" style="${isFinal ? '' : 'background:#171313; border:1px solid #351316;'}">
+              ${isFinal ? 'FINAL DESTINATION' : 'HOP #' + hop.hop}
+            </span>
+            <span class="badge font-monospace ${hop.status_code >= 300 && hop.status_code < 400 ? 'bg-warning text-dark' : 'bg-success text-white'}">
+              HTTP ${hop.status_code || 200}
+            </span>
+            <span class="badge font-monospace text-ash" style="background: #0E0B0C; border: 1px solid var(--border-hairline);">${(hop.scheme || "http").toUpperCase()}</span>
+          </div>
+          <div class="text-ash font-monospace small">
+            <span>IP: <strong class="text-blood">${hop.ip || "Unknown"}</strong></span>
+            ${hop.response_time_ms ? `<span class="ms-2">(${hop.response_time_ms}ms)</span>` : ""}
+          </div>
+        </div>
+
+        <div class="code-snippet font-monospace ${isFinal ? 'text-blood fw-bold' : 'text-bone'} text-truncate d-block mb-2" title="${hop.url}">
+          ${hop.url}
+        </div>
+
+        ${hop.server ? `<div class="text-ash small font-monospace"><span class="text-dim">Server Header:</span> ${hop.server}</div>` : ""}
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("redirectResultsSection").style.display = "block";
+}
+</script>
+{% endblock %}

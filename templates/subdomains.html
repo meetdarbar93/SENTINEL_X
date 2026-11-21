@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Subdomain Reconnaissance | SENTINEL-X{% endblock %}
+{% block breadcrumb %}ATTACK SURFACE &bull; SUBDOMAIN ENUMERATION{% endblock %}
+
+{% block content %}
+<div class="fade-in-up">
+  <!-- Top Cinematic Hero Banner -->
+  <div class="horror-module-banner mb-4">
+    <div class="module-banner-backdrop">
+      <img src="{{ url_for('static', filename='images/horror_archive_vault.jpg') }}" alt="Subdomain Archive Vault" class="module-banner-img ken-burns-subtle">
+      <div class="module-banner-overlay"></div>
+    </div>
+    <div class="module-banner-content">
+      <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
+        <div>
+          <div class="vertical-classified-tag mb-1">// PASSIVE CERTIFICATE TRANSPARENCY &bull; DNS ASSET DISCOVERY</div>
+          <h1 class="workspace-hero-heading text-bone mt-1 mb-0">SUBDOMAIN RECONNAISSANCE</h1>
+        </div>
+        <span class="badge font-mono text-ash d-none d-md-inline-block" style="background: rgba(14, 11, 12, 0.85); border: 1px solid var(--border-hairline);">
+          CRT.SH TELEMETRY &bull; RFC ISOLATED PROBES
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Domain Input Header Box -->
+  <div class="horror-card position-relative overflow-hidden mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-2 font-mono small">
+      <span class="text-blood">// TARGET APEX DOMAIN</span>
+      <span class="text-dim">NON-INTRUSIVE PASSIVE DISCOVERY</span>
+    </div>
+
+    <form id="subdomainForm" onsubmit="event.preventDefault(); runSubdomainEnumeration();">
+      <div class="oversized-domain-input-box">
+        <span class="font-mono text-blood fs-2">recon://</span>
+        <input type="text" id="targetSubdomainField" class="oversized-domain-input" placeholder="example.com or company-portal.net" autocomplete="off" required>
+        <button type="submit" id="enumSubdomainBtn" class="editorial-btn px-4 flex-shrink-0">
+          <i class="bi bi-diagram-2 me-1"></i> ENUMERATE ASSETS
+        </button>
+        <button type="button" class="editorial-btn-outline flex-shrink-0" onclick="clearSubdomainForm()">
+          CLEAR
+        </button>
+      </div>
+    </form>
+
+    <div class="d-flex flex-wrap align-items-center gap-2 mt-3 font-mono small">
+      <span class="text-ash me-1">RECON PRESETS:</span>
+      <button class="scenario-raw-tag" onclick="setSubdomainPreset('cloudflare.com')">cloudflare.com</button>
+      <button class="scenario-raw-tag" onclick="setSubdomainPreset('github.com')">github.com</button>
+      <button class="scenario-raw-tag" onclick="setSubdomainPreset('wikipedia.org')">wikipedia.org</button>
+      <button class="scenario-raw-tag" onclick="setSubdomainPreset('google.com')">google.com</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="subdomainLoadingOverlay" class="horror-card text-center p-5 mb-5 position-relative overflow-hidden" style="display: none; background: var(--bg-panel); border-color: var(--blood-crimson);">
+    <div class="cinematic-scan-beam"></div>
+    <i class="bi bi-radar fs-1 text-blood d-block mb-3 surveillance-iris-pulse"></i>
+    <h3 class="font-headline text-bone text-uppercase mb-2">QUARRYING CERTIFICATE TRANSPARENCY &amp; RESOLVING HOSTS...</h3>
+    <div class="text-ash font-mono small">
+      Mining crt.sh logs &bull; Checking DNS A records &bull; Classifying staging vs public endpoints &bull; Isolating internal perimeters
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="subdomainResultsSection" style="display: none;">
+    <!-- Metric Telemetry Cards -->
+    <div class="row g-3 mb-4 font-mono">
+      <div class="col-lg-3 col-md-6">
+        <div class="p-3 rounded h-100 horror-card mb-0">
+          <div class="text-dim small text-uppercase mb-1">TOTAL DISCOVERED</div>
+          <div class="fs-2 fw-bold text-bone" id="resTotalSubdomains">0</div>
+          <div class="text-ash small mt-1">Unique FQDN assets</div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="p-3 rounded h-100 horror-card mb-0">
+          <div class="text-dim small text-uppercase mb-1">LIVE RESOLVING</div>
+          <div class="fs-2 fw-bold text-success" id="resLiveSubdomains">0</div>
+          <div class="text-ash small mt-1">Active IPv4 bindings</div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="p-3 rounded h-100 horror-card mb-0">
+          <div class="text-dim small text-uppercase mb-1">DORMANT / HISTORICAL</div>
+          <div class="fs-2 fw-bold text-ash" id="resDormantSubdomains">0</div>
+          <div class="text-dim small mt-1">Expired certs / no A record</div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="p-3 rounded h-100 horror-card mb-0">
+          <div class="text-dim small text-uppercase mb-1">EXPOSED STAGING / DEV</div>
+          <div class="fs-2 fw-bold text-warning" id="resStagingSubdomains">0</div>
+          <div class="text-ash small mt-1">High-value attack surface</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="horror-card mb-5">
+      <!-- Action Toolbar -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom border-hairline font-mono">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <span class="text-dim small me-1">FILTER:</span>
+          <button class="editorial-btn-outline btn-sm py-1 px-3 active" id="subFilterAll" onclick="filterSubdomains('all')">ALL</button>
+          <button class="editorial-btn-outline btn-sm py-1 px-3 text-success" id="subFilterLive" onclick="filterSubdomains('live')">LIVE ONLY</button>
+          <button class="editorial-btn-outline btn-sm py-1 px-3 text-ash" id="subFilterDormant" onclick="filterSubdomains('dormant')">DORMANT</button>
+          <button class="editorial-btn-outline btn-sm py-1 px-3 text-warning" id="subFilterStaging" onclick="filterSubdomains('staging')">STAGING/DEV</button>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <div class="position-relative subdomain-search-wrap" style="min-width: 240px;">
+            <input type="text" id="subdomainSearchInput" class="form-control form-control-sm font-mono text-bone"
+                   placeholder="Search subdomain or IP..." oninput="searchSubdomains(this.value)"
+                   style="background: var(--bg-void); border: 1px solid var(--border-hairline); border-radius: 8px; padding-left: 2rem;">
+            <i class="bi bi-search position-absolute text-ash" style="top: 7px; left: 10px; font-size: 0.8rem;"></i>
+          </div>
+
+          <button class="editorial-btn-outline btn-sm py-1.5 px-3" onclick="copyAllSubdomains()">
+            <i class="bi bi-clipboard me-1"></i> COPY ALL
+          </button>
+          <button class="editorial-btn btn-sm py-1.5 px-3" onclick="exportSubdomainsCsv()">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> EXPORT CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Asset Table -->
+      <div class="horror-table-container">
+        <table class="horror-table font-mono align-middle mb-0">
+          <thead>
+            <tr>
+              <th>SUBDOMAIN / ASSET FQDN</th>
+              <th>RESOLVED IPV4</th>
+              <th>STATUS</th>
+              <th>ATTACK SURFACE CLASSIFICATION</th>
+              <th>SOURCE</th>
+              <th class="text-end">FORENSIC ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="subdomainsTableBody">
+            <!-- Injected via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/subdomains.js') }}"></script>
+{% endblock %}

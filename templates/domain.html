@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+
+{% block title %}Domain Intelligence Dossier | SENTINEL-X{% endblock %}
+{% block breadcrumb %}DOMAIN INTELLIGENCE DOSSIER{% endblock %}
+
+{% block content %}
+<div class="fade-in-up">
+  <!-- Top Cinematic Horror Hero Banner -->
+  <div class="horror-module-banner mb-4">
+    <div class="module-banner-backdrop">
+      <img src="{{ url_for('static', filename='images/horror_server_room.jpg') }}" alt="Abandoned Server Facility" class="module-banner-img ken-burns-subtle">
+      <div class="module-banner-overlay"></div>
+    </div>
+    <div class="module-banner-content">
+      <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
+        <div>
+          <div class="vertical-classified-tag mb-1">// INFRASTRUCTURE SURVEILLANCE &bull; ZONE DISCOVERY</div>
+          <h1 class="workspace-hero-heading text-bone mt-1 mb-0">DOMAIN INTELLIGENCE DOSSIER</h1>
+        </div>
+        <span class="badge font-mono text-ash d-none d-md-inline-block" style="background: rgba(14, 11, 12, 0.85); border: 1px solid var(--border-hairline);">
+          RFC-COMPLIANT RESOLUTION &bull; PASSIVE X.509 TELEMETRY
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Domain Input Header Box -->
+  <div class="horror-card position-relative overflow-hidden mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-2 font-mono small">
+      <span class="text-blood">// TARGET DOMAIN IDENTIFIER</span>
+      <span class="text-dim">APEX / SUBDOMAIN PROBE</span>
+    </div>
+
+    <form id="domainForm" onsubmit="event.preventDefault(); runDomainAnalysis();">
+      <div class="oversized-domain-input-box">
+        <span class="font-mono text-blood fs-2">host://</span>
+        <input type="text" id="targetDomainField" class="oversized-domain-input" placeholder="cloudflare.com or target-apex.org" autocomplete="off" required>
+        <button type="submit" id="analyzeDomainBtn" class="editorial-btn px-4 flex-shrink-0">
+          <i class="bi bi-shield-shaded me-1"></i> INTERROGATE ZONE
+        </button>
+        <button type="button" class="editorial-btn editorial-btn-outline flex-shrink-0" onclick="clearDomainForm()">
+          CLEAR
+        </button>
+      </div>
+    </form>
+
+    <div class="d-flex flex-wrap align-items-center gap-2 mt-3 font-mono small">
+      <span class="text-ash me-1">RECON TARGETS:</span>
+      <button class="scenario-raw-tag" onclick="setDomainTarget('cloudflare.com')">cloudflare.com</button>
+      <button class="scenario-raw-tag" onclick="setDomainTarget('google.com')">google.com</button>
+      <button class="scenario-raw-tag" onclick="setDomainTarget('github.com')">github.com</button>
+      <button class="scenario-raw-tag" onclick="setDomainTarget('wikipedia.org')">wikipedia.org</button>
+    </div>
+  </div>
+
+  <!-- Loading State: Full-Width Scanner -->
+  <div id="domainLoadingOverlay" class="horror-card text-center p-5 mb-5 position-relative overflow-hidden" style="display: none; background: #080506; border-color: var(--blood-crimson);">
+    <div class="cinematic-scan-beam"></div>
+    <i class="bi bi-globe2 fs-1 text-blood d-block mb-3 surveillance-iris-pulse"></i>
+    <h3 class="font-headline text-bone text-uppercase mb-2">INTERROGATING DNS ZONES, TLS CRYPTOGRAPHY &amp; HTTP HEADERS...</h3>
+    <div class="text-ash font-mono small">
+      Querying authoritative nameservers &bull; Validating SSRF boundary policies &bull; Decoupling SAN extensions
+    </div>
+  </div>
+
+  <!-- Results Section: Technical Editorial Dossier -->
+  <div id="domainResultsSection" style="display: none;">
+    <!-- Large Domain Title & Oversized IP Section -->
+    <div class="horror-card mb-4">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-4 border-bottom border-hairline pb-4 mb-4">
+        <div>
+          <span class="font-mono text-dim small">INTERROGATED APEX:</span>
+          <h2 class="font-headline fs-1 text-bone text-uppercase mb-0" id="resDomainName">target.com</h2>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <span class="threat-status-tag low" id="resTlsBadge">TLS Active</span>
+          <span class="threat-status-tag low" id="resHttpStatusBadge">HTTP 200 OK</span>
+          <a id="resPdfReportBtn" href="#" class="editorial-btn btn-sm py-2 px-3" target="_blank">
+            <i class="bi bi-file-earmark-pdf"></i> Export Vector PDF
+          </a>
+        </div>
+      </div>
+
+      <!-- IP Address as Oversized Technical Typography -->
+      <div class="p-4 horror-inset-box d-flex flex-wrap align-items-baseline justify-content-between gap-3">
+        <div>
+          <span class="font-mono text-blood small text-uppercase">// PRIMARY RESOLVED IP ADDRESS</span>
+          <div class="monolith-num text-blood user-select-all" id="resPrimaryIp">0.0.0.0</div>
+        </div>
+        <button class="editorial-btn editorial-btn-outline btn-sm font-mono" onclick="copyTextToClipboard(document.getElementById('resPrimaryIp').innerText, this)">
+          <i class="bi bi-clipboard me-1"></i> COPY IP
+        </button>
+      </div>
+    </div>
+
+    <!-- Editorial 2-Column Split: DNS Records & Cryptographic TLS -->
+    <div class="row g-4 mb-4">
+      <!-- DNS Records in Structured Rows -->
+      <div class="col-12 col-lg-7">
+        <div class="horror-card h-100 mb-0">
+          <div class="d-flex justify-content-between align-items-center border-bottom border-hairline pb-2 mb-3">
+            <span class="font-headline text-bone text-uppercase">// DNS ZONE RECORDS</span>
+            <span class="threat-status-tag low" id="dnsRecordsCountBadge">0 Records</span>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mb-3" id="dnsTab" role="tablist">
+            <button class="cat-pill-btn active" data-bs-toggle="tab" data-bs-target="#tabA">A (<span id="countA">0</span>)</button>
+            <button class="cat-pill-btn" data-bs-toggle="tab" data-bs-target="#tabAAAA">AAAA (<span id="countAAAA">0</span>)</button>
+            <button class="cat-pill-btn" data-bs-toggle="tab" data-bs-target="#tabMX">MX (<span id="countMX">0</span>)</button>
+            <button class="cat-pill-btn" data-bs-toggle="tab" data-bs-target="#tabNS">NS (<span id="countNS">0</span>)</button>
+            <button class="cat-pill-btn" data-bs-toggle="tab" data-bs-target="#tabTXT">TXT (<span id="countTXT">0</span>)</button>
+            <button class="cat-pill-btn" data-bs-toggle="tab" data-bs-target="#tabSOA">SOA</button>
+          </div>
+
+          <div class="tab-content" id="dnsTabContent">
+            <div class="tab-pane fade show active" id="tabA"><div id="listA" class="d-flex flex-column gap-1"></div></div>
+            <div class="tab-pane fade" id="tabAAAA"><div id="listAAAA" class="d-flex flex-column gap-1"></div></div>
+            <div class="tab-pane fade" id="tabMX"><div id="listMX" class="d-flex flex-column gap-1"></div></div>
+            <div class="tab-pane fade" id="tabNS"><div id="listNS" class="d-flex flex-column gap-1"></div></div>
+            <div class="tab-pane fade" id="tabTXT"><div id="listTXT" class="d-flex flex-column gap-1"></div></div>
+            <div class="tab-pane fade" id="tabSOA"><div id="listSOA" class="d-flex flex-column gap-1"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SSL / TLS Cryptographic Information -->
+      <div class="col-12 col-lg-5">
+        <div class="horror-card h-100 mb-0">
+          <div class="d-flex justify-content-between align-items-center border-bottom border-hairline pb-2 mb-3">
+            <span class="font-headline text-bone text-uppercase">// X.509 TLS CERTIFICATE</span>
+            <span id="sslStatusBadge" class="threat-status-tag low">Valid</span>
+          </div>
+
+          <div id="sslDetailsContainer" class="d-flex flex-column gap-1">
+            <div class="forensic-data-row">
+              <span class="row-label">CERTIFICATE ISSUER:</span>
+              <span class="row-value font-mono text-blood" id="sslIssuer">-</span>
+            </div>
+            <div class="forensic-data-row">
+              <span class="row-label">SUBJECT COMMON NAME:</span>
+              <span class="row-value font-mono text-bone" id="sslSubject">-</span>
+            </div>
+            <div class="forensic-data-row">
+              <span class="row-label">CIPHER &amp; PROTOCOL:</span>
+              <span class="row-value font-mono" id="sslTlsVersion">-</span>
+            </div>
+            <div class="forensic-data-row">
+              <span class="row-label">VALIDITY COUNTDOWN:</span>
+              <span class="row-value font-mono fw-bold" id="sslDaysRemaining">-</span>
+            </div>
+            <div class="forensic-data-row">
+              <span class="row-label">VALIDITY PERIOD:</span>
+              <span class="row-value font-mono text-dim" id="sslValidityDates">-</span>
+            </div>
+
+            <div class="mt-3">
+              <span class="font-mono text-ash small d-block mb-1">SUBJECT ALTERNATIVE NAMES (SANs):</span>
+              <div class="d-flex flex-wrap gap-1" id="sslSansContainer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editorial 2-Column Split: HTTP Headers & WHOIS Registry -->
+    <div class="row g-4">
+      <!-- HTTP Response Security Headers -->
+      <div class="col-12 col-lg-7">
+        <div class="horror-card mb-0">
+          <div class="d-flex justify-content-between align-items-center border-bottom border-hairline pb-2 mb-3">
+            <span class="font-headline text-bone text-uppercase">// HTTP DEFENSE HEADERS</span>
+            <button type="button" class="editorial-btn editorial-btn-outline btn-sm py-1 px-2.5" onclick="openRawHeadersModal()">
+              <i class="bi bi-code-slash me-1"></i> Raw Headers
+            </button>
+          </div>
+
+          <div class="horror-table-container">
+            <table class="horror-table">
+              <thead>
+                <tr>
+                  <th>Header Directive</th>
+                  <th>Status</th>
+                  <th>Observed Value / Context</th>
+                </tr>
+              </thead>
+              <tbody id="securityHeadersTableBody">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- WHOIS Registration Telemetry -->
+      <div class="col-12 col-lg-5">
+        <div class="horror-card mb-0">
+          <div class="d-flex justify-content-between align-items-center border-bottom border-hairline pb-2 mb-3">
+            <span class="font-headline text-bone text-uppercase">// WHOIS REGISTRY TELEMETRY</span>
+            <span class="threat-status-tag low" id="whoisStatusBadge">Active</span>
+          </div>
+
+          <div class="d-flex flex-column gap-1">
+            <div class="forensic-data-row">
+              <span class="row-label">SPONSORING REGISTRAR:</span>
+              <span class="row-value font-mono text-blood" id="whoisRegistrar">-</span>
+            </div>
+            <div class="forensic-data-row">
+              <span class="row-label">CREATION DATE:</span>
+              <span class="row-value font-mono text-bone" id="whoisCreated">-</span>
+            </div>
+            <div class="forensic-data-row">
+              <span class="row-label">EXPIRATION DATE:</span>
+              <span class="row-value font-mono text-dim" id="whoisExpires">-</span>
+            </div>
+            <div class="forensic-data-row">
+              <span class="row-label">NAMESERVERS:</span>
+              <div class="row-value font-mono text-blood text-end" id="whoisNameserversList">-</div>
+            </div>
+            <div class="mt-3">
+              <span class="font-mono text-ash small d-block mb-1">DOMAIN STATUS FLAGS:</span>
+              <div id="whoisStatusCodes" class="d-flex flex-wrap gap-1">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Modal: Raw Headers Inspector -->
+<div class="modal fade" id="rawHeadersModal" tabindex="-1" aria-labelledby="rawHeadersModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content horror-card">
+      <div class="d-flex justify-content-between align-items-center border-bottom border-hairline pb-3 mb-3">
+        <h5 class="font-headline text-blood mb-0" id="rawHeadersModalLabel">
+          <i class="bi bi-code-slash text-blood me-1"></i> Raw HTTP Headers
+        </h5>
+        <button type="button" class="close-index-btn" data-bs-dismiss="modal" onclick="closeModalById('rawHeadersModal')" aria-label="Close">CLOSE</button>
+      </div>
+      <div class="modal-body p-0">
+        <pre class="code-snippet p-3 text-blood mb-0 font-mono" id="rawHeadersCodeBlock" style="max-height: 400px; overflow-y: auto; background: var(--bg-void); border: 1px solid var(--border-hairline); border-radius: 3px; user-select: all;"></pre>
+      </div>
+      <div class="border-top border-hairline pt-3 mt-3 d-flex justify-content-end gap-2">
+        <button type="button" class="editorial-btn editorial-btn-outline btn-sm" id="copyRawHeadersBtn" onclick="copyTextToClipboard(document.getElementById('rawHeadersCodeBlock').innerText, this)">
+          <i class="bi bi-clipboard"></i> Copy
+        </button>
+        <button type="button" class="editorial-btn btn-sm" data-bs-dismiss="modal" onclick="closeModalById('rawHeadersModal')">Dismiss</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentDomainData = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetParam = urlParams.get("target");
+  if (targetParam) {
+    setDomainTarget(targetParam);
+    runDomainAnalysis();
+  }
+});
+
+function setDomainTarget(target) {
+  const input = document.getElementById("targetDomainField");
+  if (input) input.value = target;
+}
+
+function clearDomainForm() {
+  const input = document.getElementById("targetDomainField");
+  if (input) input.value = "";
+  document.getElementById("domainResultsSection").style.display = "none";
+}
+
+async function runDomainAnalysis() {
+  const domainInput = document.getElementById("targetDomainField");
+  const domain = domainInput.value.trim();
+
+  if (!domain) {
+    showHorrorToast("Please provide a domain to inspect.", "warning");
+    domainInput.focus();
+    return;
+  }
+
+  const loader = document.getElementById("domainLoadingOverlay");
+  const results = document.getElementById("domainResultsSection");
+  const btn = document.getElementById("analyzeDomainBtn");
+
+  loader.style.display = "block";
+  results.style.display = "none";
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch("/api/domain/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ domain: domain })
+    });
+
+    const json = await resp.json();
+
+    if (json.success && json.data) {
+      currentDomainData = json.data;
+      renderDomainResults(json.data);
+      showHorrorToast(`Domain intelligence completed for ${json.data.domain}.`, "success");
+    } else {
+      showHorrorToast(json.error || "Domain intelligence scan failed.", "danger");
+    }
+  } catch (err) {
+    showHorrorToast(`Network error: ${err.message}`, "danger");
+  } finally {
+    loader.style.display = "none";
+    btn.disabled = false;
+  }
+}
+
+function renderDomainResults(data) {
+  document.getElementById("resDomainName").innerText = data.domain;
+  document.getElementById("resPrimaryIp").innerText = data.primary_ip || "Unavailable";
+
+  // PDF report link
+  if (data.investigation_id) {
+    document.getElementById("resPdfReportBtn").href = `/api/reports/pdf/${data.investigation_id}`;
+  }
+
+  // 1. SSL Overview Badge
+  const ssl = data.ssl || {};
+  const tlsBadge = document.getElementById("resTlsBadge");
+  const sslBadge = document.getElementById("sslStatusBadge");
+
+  if (ssl.available && !ssl.is_expired) {
+    tlsBadge.className = "threat-status-tag low";
+    tlsBadge.innerText = `TLS ${ssl.tls_version || "1.3"} Active`;
+    sslBadge.className = "threat-status-tag low";
+    sslBadge.innerText = "Verified Certificate";
+  } else if (ssl.is_expired) {
+    tlsBadge.className = "threat-status-tag critical";
+    tlsBadge.innerText = "Certificate Expired";
+    sslBadge.className = "threat-status-tag critical";
+    sslBadge.innerText = "EXPIRED";
+  } else {
+    tlsBadge.className = "threat-status-tag medium";
+    tlsBadge.innerText = "No TLS on 443";
+    sslBadge.className = "threat-status-tag medium";
+    sslBadge.innerText = "Inactive";
+  }
+
+  // SSL Card Details
+  document.getElementById("sslIssuer").innerText = ssl.issuer?.organizationName || ssl.issuer?.commonName || "Undisclosed";
+  document.getElementById("sslSubject").innerText = ssl.subject?.commonName || data.domain;
+  document.getElementById("sslTlsVersion").innerText = `${ssl.tls_version || "None"} (${ssl.cipher || "N/A"})`;
+  
+  const daysElem = document.getElementById("sslDaysRemaining");
+  if (ssl.days_remaining !== null && ssl.days_remaining !== undefined) {
+    daysElem.innerText = `${ssl.days_remaining} days left`;
+    daysElem.className = ssl.days_remaining < 30 ? "row-value font-mono fw-bold text-blood" : "row-value font-mono fw-bold text-success";
+  } else {
+    daysElem.innerText = "N/A";
+  }
+
+  document.getElementById("sslValidityDates").innerText = `Valid: ${ssl.valid_from || "N/A"} to ${ssl.valid_to || "N/A"}`;
+
+  const sansContainer = document.getElementById("sslSansContainer");
+  sansContainer.innerHTML = (ssl.sans && ssl.sans.length > 0)
+    ? ssl.sans.slice(0, 10).map(s => `<span class="scenario-raw-tag">${s}</span>`).join("")
+    : `<span class="text-dim small font-mono">No SANs listed</span>`;
+
+  // 2. HTTP Status & Server
+  const http = data.http || {};
+  const httpBadge = document.getElementById("resHttpStatusBadge");
+  if (http.https_status) {
+    httpBadge.innerText = `HTTPS ${http.https_status} (${http.response_time_ms}ms)`;
+    httpBadge.className = "threat-status-tag low";
+  } else if (http.http_status) {
+    httpBadge.innerText = `HTTP ${http.http_status}`;
+    httpBadge.className = "threat-status-tag medium";
+  } else {
+    httpBadge.innerText = "HTTP Unreachable";
+    httpBadge.className = "threat-status-tag critical";
+  }
+
+  // Raw Headers Modal
+  const rawHeaders = (http && http.raw_headers && Object.keys(http.raw_headers).length > 0)
+    ? http.raw_headers
+    : null;
+  const rawBlock = document.getElementById("rawHeadersCodeBlock");
+  if (rawBlock) {
+    rawBlock.innerText = rawHeaders
+      ? JSON.stringify(rawHeaders, null, 2)
+      : "// No raw HTTP headers observed or host did not respond on HTTP port 80/443.";
+  }
+
+  // Security Headers Table
+  const secTbody = document.getElementById("securityHeadersTableBody");
+  secTbody.innerHTML = "";
+  for (const [hKey, hVal] of Object.entries(http.security_headers || {})) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="font-mono text-blood">${hKey}</td>
+      <td>
+        <span class="threat-status-tag ${hVal.present ? 'low' : 'critical'}" style="font-size:0.65rem;">
+          ${hVal.present ? 'ENFORCED' : 'MISSING'}
+        </span>
+      </td>
+      <td>
+        ${hVal.present ? `<div class="code-snippet small text-truncate font-mono py-1 px-2" style="max-width:320px;" title="${hVal.value}">${hVal.value}</div>` : `<span class="text-ash small font-mono">${hVal.recommendation}</span>`}
+      </td>
+    `;
+    secTbody.appendChild(tr);
+  }
+
+  // 3. DNS Records
+  const dns = data.dns_records || {};
+  renderDnsList("listA", "countA", dns.A || []);
+  renderDnsList("listAAAA", "countAAAA", dns.AAAA || []);
+  renderDnsList("listNS", "countNS", dns.NS || []);
+  renderDnsList("listTXT", "countTXT", dns.TXT || []);
+
+  // Render MX
+  const mxContainer = document.getElementById("listMX");
+  document.getElementById("countMX").innerText = (dns.MX || []).length;
+  if (dns.MX && dns.MX.length > 0) {
+    mxContainer.innerHTML = dns.MX.map(m => `
+      <div class="forensic-data-row">
+        <span class="row-label font-mono text-blood">${m.exchange}</span>
+        <span class="row-value font-mono">Preference: ${m.preference}</span>
+      </div>
+    `).join("");
+  } else {
+    mxContainer.innerHTML = `<div class="text-ash p-2 font-mono small">No MX records identified.</div>`;
+  }
+
+  // Render SOA
+  const soaContainer = document.getElementById("listSOA");
+  if (dns.SOA && dns.SOA.length > 0) {
+    const s = dns.SOA[0];
+    soaContainer.innerHTML = `
+      <div class="forensic-data-row"><span class="row-label">PRIMARY NS:</span><span class="row-value text-blood">${s.mname}</span></div>
+      <div class="forensic-data-row"><span class="row-label">RESPONSIBLE:</span><span class="row-value text-bone">${s.rname}</span></div>
+      <div class="forensic-data-row"><span class="row-label">SERIAL:</span><span class="row-value text-dim">${s.serial}</span></div>
+      <div class="text-ash font-mono small pt-2">Refresh: ${s.refresh}s | Retry: ${s.retry}s | Expire: ${s.expire}s</div>
+    `;
+  } else {
+    soaContainer.innerHTML = `<div class="text-ash p-2 font-mono small">No SOA record identified.</div>`;
+  }
+
+  const totalDnsCount = (dns.A?.length || 0) + (dns.AAAA?.length || 0) + (dns.MX?.length || 0) + (dns.NS?.length || 0) + (dns.TXT?.length || 0) + (dns.SOA?.length || 0);
+  document.getElementById("dnsRecordsCountBadge").innerText = `${totalDnsCount} Records`;
+
+  // 4. WHOIS Details
+  const whois = data.whois || {};
+  document.getElementById("whoisRegistrar").innerText = whois.registrar || "RDAP / Registry Protected";
+  document.getElementById("whoisCreated").innerText = whois.creation_date || "Undisclosed";
+  document.getElementById("whoisExpires").innerText = whois.expiration_date || "Undisclosed";
+
+  const whoisNs = document.getElementById("whoisNameserversList");
+  whoisNs.innerHTML = (whois.name_servers && whois.name_servers.length > 0)
+    ? whois.name_servers.map(ns => `<div>&bull; ${ns}</div>`).join("")
+    : `<span class="text-ash">Not reported</span>`;
+
+  const whoisStatus = document.getElementById("whoisStatusCodes");
+  whoisStatus.innerHTML = (whois.status && whois.status.length > 0)
+    ? whois.status.map(st => `<span class="scenario-raw-tag">${st}</span>`).join("")
+    : `<span class="threat-status-tag low">active</span>`;
+
+  document.getElementById("domainResultsSection").style.display = "block";
+}
+
+function renderDnsList(containerId, countId, items) {
+  const container = document.getElementById(containerId);
+  const countBadge = document.getElementById(countId);
+  if (countBadge) countBadge.innerText = items.length;
+
+  if (items && items.length > 0) {
+    container.innerHTML = items.map(item => `
+      <div class="forensic-data-row">
+        <span class="font-mono text-blood user-select-all">${item}</span>
+        <button class="btn btn-sm btn-link text-ash p-0 font-mono" onclick="copyTextToClipboard('${item}', this)" title="Copy">
+          <i class="bi bi-clipboard"></i>
+        </button>
+      </div>
+    `).join("");
+  } else {
+    container.innerHTML = `<div class="text-ash p-2 font-mono small">No records found.</div>`;
+  }
+}
+
+function openRawHeadersModal() {
+  const modalEl = document.getElementById("rawHeadersModal");
+  if (!modalEl) return;
+
+  const rawBlock = document.getElementById("rawHeadersCodeBlock");
+  const headers = (currentDomainData && currentDomainData.http && currentDomainData.http.raw_headers)
+    ? currentDomainData.http.raw_headers
+    : null;
+
+  if (rawBlock) {
+    if (headers && Object.keys(headers).length > 0) {
+      rawBlock.innerText = JSON.stringify(headers, null, 2);
+    } else if (!rawBlock.innerText || rawBlock.innerText.trim() === "" || rawBlock.innerText.trim() === "{}") {
+      rawBlock.innerText = "// No raw HTTP headers observed or host did not respond on HTTP port 80/443.";
+    }
+  }
+
+  const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+  modalInstance.show();
+}
+</script>
+{% endblock %}

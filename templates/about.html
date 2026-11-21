@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Architecture &amp; Intelligence Framework | SENTINEL-X{% endblock %}
+{% block breadcrumb %}08 // ARCHITECTURE FRAMEWORK{% endblock %}
+
+{% block content %}
+<!-- Top Cinematic Horror Hero Banner -->
+<div class="horror-module-banner mb-4">
+  <div class="module-banner-backdrop">
+    <img src="{{ url_for('static', filename='images/horror_dashboard_facility.jpg') }}" alt="Underground Research Facility" class="module-banner-img ken-burns-subtle">
+    <div class="module-banner-overlay"></div>
+  </div>
+  <div class="module-banner-content">
+    <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
+      <div>
+        <div class="vertical-classified-tag mb-1">SYSTEM DOCTRINE // TECHNICAL SPECIFICATION</div>
+        <h1 class="horror-glitch horror-font mb-1"><i class="bi bi-cpu text-blood"></i> THE ARCHITECTURE OF SHADOWS</h1>
+        <p class="text-ash mb-0" style="max-width: 650px;">Comprehensive overview of SENTINEL-X paranormal threat telemetry engineering, passive reconnaissance capabilities, and defensive posture.</p>
+      </div>
+      <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+        <span class="system-telemetry-pill">
+          <i class="bi bi-shield-check text-blood"></i> ZERO-EXPLOIT DEFENSIVE POSTURE
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mission Hero Card -->
+<div class="horror-card mb-4" style="border-left: 3px solid var(--blood-crimson);">
+  <div class="row align-items-center g-4">
+    <div class="col-12 col-lg-8">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="badge font-monospace text-blood" style="background:rgba(181,18,27,0.15); border:1px solid var(--border-hairline);">CLASSIFIED THREAT PLATFORM</span>
+        <span class="badge font-monospace text-ash" style="background:var(--bg-subtle); border:1px solid var(--border-hairline);">v{{ app_version }}</span>
+      </div>
+      <h2 class="text-bone font-headline fw-bold mb-3" style="font-size: clamp(1.8rem, 3vw, 2.6rem); letter-spacing: -1px;">
+        SENTINEL-X: Passive Threat Telemetry &amp; URL Intelligence
+      </h2>
+      <p class="text-ash leading-relaxed mb-3" style="font-size: 1.05rem;">
+        SENTINEL-X is a unified, professional-grade cybersecurity investigation and threat telemetry platform engineered to deconstruct hostile digital infrastructure and detect modern cyber threats before weaponization. By combining multi-vector OSINT search operator generation, DNS zone mapping, cryptographic TLS inspection, sandboxed HTTP redirect tracing, and transparent heuristic risk scoring, the platform empowers analysts and intelligence researchers to deconstruct attack surfaces without invasive network scanning.
+      </p>
+      <div class="d-flex flex-wrap gap-2 pt-2 border-top border-horror">
+        <span class="badge font-monospace text-blood" style="background:rgba(181,18,27,0.1); border:1px solid var(--border-hairline);"><i class="bi bi-check2 text-blood"></i> Passive Reconnaissance</span>
+        <span class="badge font-monospace text-blood" style="background:rgba(181,18,27,0.1); border:1px solid var(--border-hairline);"><i class="bi bi-check2 text-blood"></i> SSRF Boundary Protection</span>
+        <span class="badge font-monospace text-blood" style="background:rgba(181,18,27,0.1); border:1px solid var(--border-hairline);"><i class="bi bi-check2 text-blood"></i> RFC 1918 Enforced</span>
+        <span class="badge font-monospace text-blood" style="background:rgba(181,18,27,0.1); border:1px solid var(--border-hairline);"><i class="bi bi-check2 text-blood"></i> Zero-Exploit Defensive Posture</span>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4 text-center">
+      <div class="horror-inset-box p-4 rounded border text-center">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Sentinel-X Paranormal Core" style="width: 120px; height: 120px;" class="mb-3 threat-pulse">
+        <div class="fw-bold text-bone font-headline fs-5">SENTINEL-X v{{ app_version }}</div>
+        <div class="text-blood small mt-1 font-headline letter-spacing-1 fw-bold">"EVERY URL HIDES A STORY."</div>
+        <div class="text-ash small mt-2 font-monospace">ENGINE: HYBRID PYTHON / FLASK 3</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Architecture & Capabilities Matrix -->
+<div class="row g-4 mb-4">
+  <div class="col-12 col-md-6">
+    <div class="horror-card h-100 mb-0">
+      <div class="horror-card-header">
+        <h5 class="horror-card-title text-blood">
+          <i class="bi bi-bullseye text-blood"></i> Threat Landscape &amp; Heuristics
+        </h5>
+      </div>
+      <p class="text-ash small leading-relaxed">
+        Modern cyber adversaries frequently leverage homograph domain spoofing (Punycode), non-standard port listeners, URL shortening obfuscation, credential parameter injection via '@' symbols, and multi-hop HTTP redirect cascades to bypass standard email and web security gateways. Traditional tools either require complex command-line setups or rely on closed-source third-party cloud APIs that leak target telemetry.
+      </p>
+      <p class="text-ash small leading-relaxed mb-0">
+        SENTINEL-X solves this gap by executing local, transparent, rule-based forensic analysis directly within an integrated intelligence investigation terminal.
+      </p>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6">
+    <div class="horror-card h-100 mb-0">
+      <div class="horror-card-header">
+        <h5 class="horror-card-title text-blood">
+          <i class="bi bi-cpu text-blood"></i> Technology Stack Specification
+        </h5>
+      </div>
+      <div class="d-flex flex-column gap-2 small font-monospace">
+        <div class="d-flex justify-content-between p-2 rounded horror-inset-box">
+          <span class="text-bone">Backend Web Framework</span>
+          <span class="text-blood">Python 3.8+ / Flask 3.0</span>
+        </div>
+        <div class="d-flex justify-content-between p-2 rounded horror-inset-box">
+          <span class="text-bone">DNS Zone Resolver</span>
+          <span class="text-blood">dnspython 2.6.x (RFC DNS)</span>
+        </div>
+        <div class="d-flex justify-content-between p-2 rounded horror-inset-box">
+          <span class="text-bone">Cryptographic TLS Engine</span>
+          <span class="text-blood">Python SSL / Sockets (TLS 1.3)</span>
+        </div>
+        <div class="d-flex justify-content-between p-2 rounded horror-inset-box">
+          <span class="text-bone">PDF Vector Compiler</span>
+          <span class="text-blood">ReportLab 4.x Engine</span>
+        </div>
+        <div class="d-flex justify-content-between p-2 rounded horror-inset-box">
+          <span class="text-bone">Database Store</span>
+          <span class="text-blood">SQLite3 Local Encrypted Journal</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 Tactical Pillars -->
+<div class="row g-4 mb-4">
+  <div class="col-12 col-md-4">
+    <div class="horror-card h-100 mb-0" style="border-top: 2px solid var(--blood-crimson);">
+      <div class="horror-card-header">
+        <h6 class="horror-card-title text-blood"><i class="bi bi-terminal text-blood"></i> 1. OSINT Generator</h6>
+      </div>
+      <p class="text-ash small mb-0">
+        10 distinct intelligence categories encompassing public documents, login portals, exposed .env and config manifests, directory indexes, subdomains, error stack traces, and database backup dumps.
+      </p>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="horror-card h-100 mb-0" style="border-top: 2px solid #650B12;">
+      <div class="horror-card-header">
+        <h6 class="horror-card-title text-blood"><i class="bi bi-globe2 text-blood"></i> 2. Domain Intelligence</h6>
+      </div>
+      <p class="text-ash small mb-0">
+        Live DNS record querying (A, AAAA, MX, NS, TXT, SOA), X.509 certificate parsing, SANs extraction, HTTP/HTTPS security header validation (HSTS, CSP, X-Frame-Options), and WHOIS registration metadata.
+      </p>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="horror-card h-100 mb-0" style="border-top: 2px solid var(--blood-bright);">
+      <div class="horror-card-header">
+        <h6 class="horror-card-title text-blood"><i class="bi bi-shield-check text-blood"></i> 3. URL Threat Forensics</h6>
+      </div>
+      <p class="text-ash small mb-0">
+        Deconstructs URI schemes, ports, and parameters. Analyzes Punycode, typosquatting, executable payloads, and credential harvesting keywords, scoring threats on an audited 0–100 heuristic scale.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Security Boundaries & Ethical Guidelines -->
+<div class="horror-card">
+  <div class="horror-card-header">
+    <h5 class="horror-card-title text-blood">
+      <i class="bi bi-shield-exclamation text-blood"></i> Security Boundaries &amp; Ethical Reconnaissance Policy
+    </h5>
+  </div>
+  <div class="row g-4">
+    <div class="col-12 col-md-6">
+      <h6 class="text-blood font-monospace small fw-bold mb-2"><i class="bi bi-lock-fill text-blood me-1"></i> Defensive SSRF Guardrails</h6>
+      <ul class="text-ash small ps-3 mb-0 leading-relaxed">
+        <li>Strict pre-connection validation prevents loopback (127.0.0.1, ::1) scanning.</li>
+        <li>Automatic rejection of RFC 1918 private subnets (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16).</li>
+        <li>Cloud metadata endpoints (169.254.169.254) are strictly blocked.</li>
+        <li>Every single hop in redirect inspection chains is independently resolved and verified.</li>
+        <li>Request timeouts are strictly capped at 5 seconds to mitigate DoS hazards.</li>
+      </ul>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <h6 class="text-blood font-monospace small fw-bold mb-2"><i class="bi bi-shield-shaded text-blood me-1"></i> Responsible Disclosure &amp; Scope</h6>
+      <p class="text-ash small leading-relaxed mb-0">
+        SENTINEL-X is designed solely for defensive security operations, authorized infrastructure auditing, asset perimeter management, and security research. The tool does not perform brute-force attacks, port scanning, or unauthorized exploitation. Users are required to adhere to all applicable cyber regulations and maintain documented authorization prior to investigating third-party assets.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

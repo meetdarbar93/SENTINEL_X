@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}OSINT Research Workspace | SENTINEL-X{% endblock %}
+{% block breadcrumb %}OSINT RESEARCH WORKSPACE{% endblock %}
+
+{% block content %}
+<div class="osint-research-workspace fade-in-up">
+  <!-- Top Cinematic Horror Hero Banner -->
+  <div class="horror-module-banner mb-4">
+    <div class="module-banner-backdrop">
+      <img src="{{ url_for('static', filename='images/horror_osint_room.jpg') }}" alt="OSINT Investigation Terminal" class="module-banner-img ken-burns-subtle">
+      <div class="module-banner-overlay"></div>
+    </div>
+    <div class="module-banner-content">
+      <div class="vertical-classified-tag mb-1">// OSINT RECONNAISSANCE CHAMBER &bull; GOOGLE DORK ENGINE</div>
+      <h1 class="workspace-hero-heading text-bone mt-1 mb-2">WHAT DOES THE INTERNET KNOW?</h1>
+      <p class="hero-editorial-lead font-body mb-0">
+        Synthesize targeted Google search operator matrices across 10 intelligence vectors to expose leaked assets, misconfigured portals, and shadow repositories without alerting target monitors.
+      </p>
+    </div>
+  </div>
+
+  <!-- Integrated Large Domain Input Bar -->
+  <div class="horror-card mb-0 position-relative">
+    <div class="d-flex justify-content-between align-items-center mb-2 font-mono small">
+      <span class="text-blood">// TARGET ORGANIZATION OR ROOT DOMAIN</span>
+      <div class="d-flex gap-2">
+        <button class="editorial-btn editorial-btn-outline btn-sm py-1 px-2.5" onclick="toggleOsintHistoryDropdown()">
+          <i class="bi bi-clock-history me-1"></i> HISTORY
+        </button>
+      </div>
+    </div>
+
+    <form id="osintForm" onsubmit="event.preventDefault(); runOsintGeneration();">
+      <div class="oversized-domain-input-box">
+        <span class="font-mono text-blood fs-2">domain://</span>
+        <input type="text" id="targetDomainInput" class="oversized-domain-input" placeholder="example.com or company-corp.org" autocomplete="off" required>
+        <button type="submit" id="generateOsintBtn" class="editorial-btn px-4 flex-shrink-0">
+          <i class="bi bi-cpu me-1"></i> FORGE QUERIES
+        </button>
+        <button type="button" class="editorial-btn editorial-btn-outline flex-shrink-0" onclick="clearOsintForm()">
+          CLEAR
+        </button>
+      </div>
+    </form>
+
+    <!-- Preset Targets -->
+    <div class="d-flex flex-wrap align-items-center gap-2 mt-3 font-mono small">
+      <span class="text-ash me-1">AUDIT PRESETS:</span>
+      <button type="button" class="scenario-raw-tag" onclick="setOsintDomain('example.com')">example.com</button>
+      <button type="button" class="scenario-raw-tag" onclick="setOsintDomain('github.com')">github.com</button>
+      <button type="button" class="scenario-raw-tag" onclick="setOsintDomain('cloudflare.com')">cloudflare.com</button>
+      <button type="button" class="scenario-raw-tag" onclick="setOsintDomain('tesla.com')">tesla.com</button>
+    </div>
+
+    <!-- Collapsible Recent Target History Drawer -->
+    <div id="osintHistoryPanel" class="mt-3 pt-3 border-top border-hairline" style="display: none;">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="font-mono text-blood small">// PREVIOUS AUDIT TARGETS</span>
+        <button class="btn btn-sm btn-link text-dim p-0 font-mono" onclick="toggleOsintHistoryDropdown()">Dismiss</button>
+      </div>
+      <div id="osintHistoryList" class="d-flex flex-wrap gap-2">
+        <span class="text-ash font-mono small">Loading historical searches...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State: Full-Width Scanner -->
+  <div id="osintLoadingOverlay" class="horror-card text-center p-5 position-relative overflow-hidden" style="display: none; background: #080506; border-color: var(--blood-crimson);">
+    <div class="cinematic-scan-beam"></div>
+    <i class="bi bi-radioactive fs-1 text-blood d-block mb-3 surveillance-iris-pulse"></i>
+    <h3 class="font-headline text-bone text-uppercase mb-2" id="scannerProgressText">FORGING 10-VECTOR DORK OPERATOR MATRIX...</h3>
+    <div class="text-ash font-mono small">
+      Parsing site indices &bull; Restricting MIME filetypes &bull; Synthesizing authentication path filters &bull; Compiling reconnaissance dossier
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="osintResultsSection" style="display: none;">
+    <!-- Research Action Bar -->
+    <div class="horror-card mb-4">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+          <span class="font-mono text-dim small">ACTIVE RECON MATRIX:</span>
+          <h3 class="font-headline text-blood fs-2 mb-0" id="resultsDomainLabel">target.com</h3>
+          <div class="text-ash font-mono small mt-1">
+            Synthesized <strong class="text-bone" id="totalQueriesBadge">0</strong> targeted reconnaissance operators across 10 security vectors.
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <input type="text" id="inCategoryFilterInput" class="aperture-input" placeholder="Filter queries in view..." style="max-width: 240px;" oninput="filterRenderedQueries()">
+          <button id="copyAllQueriesBtn" class="editorial-btn" onclick="copyAllQueriesMaster()">
+            <i class="bi bi-clipboard-check me-1"></i> COPY ALL QUERIES
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full-Width Vector Category Pills Matrix -->
+    <div class="mb-4">
+      <div class="font-mono text-ash small mb-2">// SELECT VECTOR FOCUS:</div>
+      <div class="category-editorial-pills" id="osintCategoryTabs">
+        <button class="cat-pill-btn active" id="tab-all-btn" onclick="selectCategoryTab('all')">
+          ALL VECTORS (<span id="catCountAll">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <!-- Hidden category select to support programmatic sync -->
+    <select id="osintCategoryFilterSelect" style="display: none;"></select>
+
+    <!-- Asymmetrical Query Blocks Container -->
+    <div id="categoriesListContainer" class="d-flex flex-column gap-4">
+      <!-- Injected via JS -->
+    </div>
+
+    <!-- Ethical Research Notice -->
+    <div class="horror-card mt-4">
+      <div class="d-flex align-items-start gap-3">
+        <i class="bi bi-shield-exclamation text-blood fs-2"></i>
+        <div>
+          <h5 class="font-headline text-bone text-uppercase mb-1">// ETHICAL DEFENSIVE RECONNAISSANCE NOTICE</h5>
+          <p class="text-ash font-body small mb-0">
+            All generated Google dork queries are intended solely for authorized passive surface mapping, defensive asset auditing, and external perimeter verification. Google dorks query already-indexed public search results and perform zero active penetration. Always maintain documented authorization before researching third-party systems.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentOsintData = null;
+let activeCategoryFilter = "all";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetParam = urlParams.get("target");
+  if (targetParam) {
+    setOsintDomain(targetParam);
+    runOsintGeneration();
+  }
+  loadOsintHistoryPills();
+});
+
+function setOsintDomain(domain) {
+  const input = document.getElementById("targetDomainInput");
+  if (input) input.value = domain;
+}
+
+function clearOsintForm() {
+  const input = document.getElementById("targetDomainInput");
+  if (input) input.value = "";
+  document.getElementById("osintResultsSection").style.display = "none";
+}
+
+function onCategorySelectChange(catId) {
+  selectCategoryTab(catId);
+}
+
+function toggleOsintHistoryDropdown() {
+  const panel = document.getElementById("osintHistoryPanel");
+  if (panel) {
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+  }
+}
+
+async function loadOsintHistoryPills() {
+  const container = document.getElementById("osintHistoryList");
+  if (!container) return;
+  try {
+    const resp = await fetch("/api/history?type=osint_query&limit=8");
+    const json = await resp.json();
+    if (json.success && json.records && json.records.length > 0) {
+      container.innerHTML = json.records.map(r => `
+        <button type="button" class="scenario-raw-tag" onclick="setOsintDomain('${escapeJsString(r.target)}'); runOsintGeneration();">
+          <i class="bi bi-terminal text-blood me-1"></i> ${r.target}
+        </button>
+      `).join("");
+    } else {
+      container.innerHTML = `<span class="text-ash font-mono small">No previous OSINT searches recorded.</span>`;
+    }
+  } catch (err) {
+    container.innerHTML = `<span class="text-danger font-mono small">Failed to load history</span>`;
+  }
+}
+
+async function runOsintGeneration() {
+  const domainInput = document.getElementById("targetDomainInput");
+  const domain = domainInput.value.trim();
+
+  if (!domain) {
+    showHorrorToast("Please provide a domain to inspect.", "warning");
+    domainInput.focus();
+    return;
+  }
+
+  const loader = document.getElementById("osintLoadingOverlay");
+  const resultsSection = document.getElementById("osintResultsSection");
+  const btn = document.getElementById("generateOsintBtn");
+
+  loader.style.display = "block";
+  resultsSection.style.display = "none";
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch("/api/osint/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ domain: domain })
+    });
+
+    const json = await resp.json();
+
+    if (json.success && json.data) {
+      currentOsintData = json.data;
+      renderOsintResults(json.data);
+      loadOsintHistoryPills();
+      showHorrorToast(`Forged ${json.data.total_queries} queries for ${json.data.domain}.`, "success");
+    } else {
+      showHorrorToast(json.error || "Failed to generate OSINT queries.", "danger");
+    }
+  } catch (err) {
+    showHorrorToast(`Network error: ${err.message}`, "danger");
+  } finally {
+    loader.style.display = "none";
+    btn.disabled = false;
+  }
+}
+
+function renderOsintResults(data) {
+  document.getElementById("resultsDomainLabel").innerText = data.domain;
+  document.getElementById("totalQueriesBadge").innerText = data.total_queries;
+  document.getElementById("catCountAll").innerText = data.total_queries;
+
+  // Build Tab Buttons
+  const tabList = document.getElementById("osintCategoryTabs");
+  const existingDynTabs = tabList.querySelectorAll(".dynamic-cat-btn");
+  existingDynTabs.forEach(el => el.remove());
+
+  data.categories.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "cat-pill-btn dynamic-cat-btn";
+    btn.id = `tab-${cat.id}-btn`;
+    btn.onclick = () => selectCategoryTab(cat.id);
+    btn.innerHTML = `
+      <i class="bi ${cat.icon} me-1"></i> ${cat.title.split('. ')[1] || cat.title} (${cat.query_count})
+    `;
+    tabList.appendChild(btn);
+  });
+
+  renderCategoryCards(data.categories);
+  document.getElementById("osintResultsSection").style.display = "block";
+}
+
+function renderCategoryCards(categories) {
+  const container = document.getElementById("categoriesListContainer");
+  container.innerHTML = "";
+
+  categories.forEach(cat => {
+    const isHidden = (activeCategoryFilter !== "all" && activeCategoryFilter !== cat.id);
+
+    const catDiv = document.createElement("div");
+    catDiv.className = `horror-card osint-cat-card ${isHidden ? 'd-none' : ''}`;
+    catDiv.id = `cat-card-${cat.id}`;
+
+    catDiv.innerHTML = `
+      <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom border-hairline pb-2 mb-3">
+        <div>
+          <h4 class="font-headline text-bone text-uppercase mb-0">
+            <i class="bi ${cat.icon} text-blood me-1"></i> ${cat.title}
+          </h4>
+          <span class="text-ash small">${cat.description}</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="threat-status-tag low">${cat.query_count} Queries</span>
+          <button class="editorial-btn editorial-btn-outline btn-sm py-1 px-2.5" onclick="copyCategoryQueries('${cat.id}')">
+            <i class="bi bi-clipboard"></i> Copy Category
+          </button>
+        </div>
+      </div>
+
+      <div class="editorial-query-grid">
+        ${cat.queries.map((q) => `
+          <div class="editorial-query-block query-item-card" data-query-text="${q.query.toLowerCase()}" data-query-name="${q.name.toLowerCase()}">
+            <div>
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <strong class="font-headline text-bone fs-6">${q.name}</strong>
+                <div class="d-flex gap-1 flex-wrap">
+                  ${q.operators.map(op => `<span class="badge bg-secondary font-mono" style="font-size:0.65rem; border:1px solid #221214;">${op}</span>`).join("")}
+                </div>
+              </div>
+
+              <div class="code-snippet p-2.5 font-mono text-blood user-select-all mb-2" style="background:var(--bg-void); border:1px solid var(--border-hairline); border-radius:3px;">
+                ${q.query}
+              </div>
+
+              <div class="text-ash small font-body">
+                ${q.explanation}
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 border-top border-hairline pt-2 mt-2">
+              <button class="editorial-btn editorial-btn-outline btn-sm py-1 px-2.5" onclick="copyTextToClipboard('${escapeJsString(q.query)}', this)">
+                <i class="bi bi-clipboard"></i> Copy
+              </button>
+              <a href="${q.google_url}" target="_blank" rel="noopener noreferrer" class="editorial-btn btn-sm py-1 px-2.5">
+                <i class="bi bi-box-arrow-up-right"></i> Google
+              </a>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    container.appendChild(catDiv);
+  });
+}
+
+function selectCategoryTab(catId) {
+  activeCategoryFilter = catId;
+
+  const allBtns = document.querySelectorAll("#osintCategoryTabs .cat-pill-btn");
+  allBtns.forEach(btn => btn.classList.remove("active"));
+
+  const targetBtn = document.getElementById(catId === "all" ? "tab-all-btn" : `tab-${catId}-btn`);
+  if (targetBtn) targetBtn.classList.add("active");
+
+  const cards = document.querySelectorAll(".osint-cat-card");
+  cards.forEach(card => {
+    if (catId === "all") {
+      card.classList.remove("d-none");
+    } else {
+      if (card.id === `cat-card-${catId}`) {
+        card.classList.remove("d-none");
+      } else {
+        card.classList.add("d-none");
+      }
+    }
+  });
+}
+
+function filterRenderedQueries() {
+  const search = document.getElementById("inCategoryFilterInput").value.toLowerCase().trim();
+  const queryCards = document.querySelectorAll(".query-item-card");
+
+  queryCards.forEach(card => {
+    const text = card.getAttribute("data-query-text") || "";
+    const name = card.getAttribute("data-query-name") || "";
+    if (!search || text.includes(search) || name.includes(search)) {
+      card.classList.remove("d-none");
+    } else {
+      card.classList.add("d-none");
+    }
+  });
+}
+
+function copyCategoryQueries(catId) {
+  if (!currentOsintData) return;
+  const cat = currentOsintData.categories.find(c => c.id === catId);
+  if (!cat) return;
+
+  const allText = cat.queries.map(q => `# ${q.name}\n${q.query}`).join("\n\n");
+  copyTextToClipboard(allText);
+  showHorrorToast(`Copied ${cat.queries.length} operators from '${cat.title}'!`, "success");
+}
+
+function copyAllQueriesMaster() {
+  if (!currentOsintData) return;
+  let allText = `SENTINEL-X RECONNAISSANCE DOSSIER\nTarget: ${currentOsintData.domain}\nTotal Queries: ${currentOsintData.total_queries}\n\n`;
+
+  currentOsintData.categories.forEach(cat => {
+    allText += `====================================================\n`;
+    allText += `${cat.title.toUpperCase()}\n`;
+    allText += `====================================================\n`;
+    cat.queries.forEach(q => {
+      allText += `[${q.name}]\n${q.query}\n\n`;
+    });
+  });
+
+  copyTextToClipboard(allText);
+  showHorrorToast(`Copied all ${currentOsintData.total_queries} queries to clipboard!`, "success");
+}
+
+function escapeJsString(str) {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+</script>
+{% endblock %}

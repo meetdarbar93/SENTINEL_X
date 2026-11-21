@@ -1,0 +1,746 @@
+{% extends "base.html" %}
+
+{% block title %}Multi-Engine Cyber Threat Scanner | SENTINEL-X{% endblock %}
+{% block breadcrumb %}VIRUSTOTAL CONSENSUS SCANNER{% endblock %}
+
+{% block content %}
+<div class="fade-in-up">
+  <!-- Top Cinematic Hero Banner -->
+  <div class="horror-module-banner mb-4">
+    <div class="module-banner-backdrop">
+      <img src="{{ url_for('static', filename='images/horror_server_room.jpg') }}" alt="Dark Cyber Operations Facility" class="module-banner-img ken-burns-subtle">
+      <div class="module-banner-overlay"></div>
+    </div>
+    <div class="module-banner-content">
+      <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
+        <div>
+          <div class="vertical-classified-tag mb-1">// MULTI-ENGINE THREAT MATRIX &bull; VIRUSTOTAL CONSENSUS CORE</div>
+          <h1 class="workspace-hero-heading text-bone mt-1 mb-0">CYBER THREAT &amp; EXPLOIT SCANNER</h1>
+        </div>
+        <span class="badge font-mono text-ash d-none d-md-inline-block" style="background: rgba(14, 11, 12, 0.85); border: 1px solid var(--border-hairline);">
+          68 SECURITY VENDORS &bull; ALL ATTACK VECTORS &bull; RFC SSRF BOUNDARY
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Target Input Panel -->
+  <div class="horror-card position-relative overflow-hidden mb-5">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <span class="font-mono text-blood small text-uppercase">// TARGET HOSTNAME, DOMAIN OR ARBITRARY URI</span>
+      <span class="font-mono text-dim small">VIRUSTOTAL-GRADE MULTI-ENGINE HEURISTICS</span>
+    </div>
+
+    <form id="threatScannerForm" onsubmit="event.preventDefault(); runThreatScan();">
+      <div class="oversized-domain-input-box">
+        <span class="font-mono text-blood fs-3">scan://</span>
+        <input type="text" id="scannerTargetInput" class="oversized-domain-input" placeholder="target.com, http://bad.xyz/payload.exe, or 104.244.42.1" autocomplete="off" required>
+        <button type="submit" id="scannerSubmitBtn" class="editorial-btn px-4 flex-shrink-0">
+          <i class="bi bi-shield-shaded me-1"></i> SCAN TARGET
+        </button>
+        <button type="button" class="editorial-btn editorial-btn-outline flex-shrink-0" onclick="clearThreatScanner()">
+          CLEAR
+        </button>
+        <button type="button" class="editorial-btn editorial-btn-outline flex-shrink-0" data-bs-toggle="modal" data-bs-target="#batchScannerModal">
+          <i class="bi bi-layers-half me-1"></i> BATCH MATRIX
+        </button>
+      </div>
+    </form>
+
+    <!-- Tactical Scenario Attack Presets -->
+    <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+      <span class="text-ash small font-mono me-1">ATTACK VECTOR PRESETS:</span>
+      <button class="scenario-raw-tag" onclick="setScannerPreset('https://wikipedia.org', true)">#CLEAN_SITE</button>
+      <button class="scenario-raw-tag" onclick="setScannerPreset('http://paypal.com@verify-auth-session.top/login.php', true)">#PHISHING_ATTACK</button>
+      <button class="scenario-raw-tag" onclick="setScannerPreset('http://update-system-patch.xyz/ransom/invoice_decryptor.exe', true)">#MALWARE_DROPPER</button>
+      <button class="scenario-raw-tag" onclick="setScannerPreset('https://shop.example.com/products?cat=1\' UNION SELECT username,password FROM users--', true)">#SQL_INJECTION</button>
+      <button class="scenario-raw-tag" onclick="setScannerPreset('http://free-movies-stream.top/stream.js?engine=coinhive', true)">#CRYPTOJACKING</button>
+      <button class="scenario-raw-tag" onclick="setScannerPreset('http://127.0.0.1:8080/admin', true)">#SSRF_INTERNAL_BLOCK</button>
+    </div>
+  </div>
+
+  <!-- Loading Animation -->
+  <div id="scannerLoadingOverlay" class="horror-card text-center p-5 mb-5 position-relative overflow-hidden" style="display: none; background: #080506; border-color: var(--blood-crimson);">
+    <div class="cinematic-scan-beam"></div>
+    <i class="bi bi-shield-slash fs-1 text-blood d-block mb-3 surveillance-iris-pulse"></i>
+    <h3 class="font-headline text-bone text-uppercase mb-2" id="scannerStatusTitle">PROBING 68 SECURITY VENDOR ENGINES...</h3>
+    <div class="text-ash font-mono small" id="scannerStatusSubtitle">
+      Evaluating Phishing, Droppers, Ransomware C2, SQLi, XSS, Cryptojacking &bull; Enforcing RFC-1918 Boundary
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="scannerResultsSection" style="display: none;">
+    <!-- Subject Overview Card -->
+    <div class="horror-card mb-4" id="scannerTargetBanner">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="font-mono text-dim small">TARGET UNDER CONSENSUS AUDIT:</span>
+            <span class="badge bg-secondary font-mono small text-blood" id="resTargetScheme">HTTPS</span>
+            <span class="badge font-mono small" id="resTargetPort" style="background: rgba(255,255,255,0.05); color: var(--text-ash); border: 1px solid var(--border-hairline);">PORT 443</span>
+          </div>
+          <div class="font-mono fs-4 text-bone fw-bold user-select-all text-truncate" style="max-width: 850px;" id="resTargetDisplay">
+            https://target.com
+          </div>
+          <p class="text-ash small mt-1 mb-0" id="resSummaryText">
+            Multi-engine heuristic consensus scan completed across 68 vendor engines.
+          </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <a id="scannerDownloadPdfBtn" href="#" class="editorial-btn btn-sm py-2 px-3" target="_blank">
+            <i class="bi bi-file-earmark-pdf"></i> Export Vector PDF
+          </a>
+          <a id="scannerExportJsonBtn" href="#" class="editorial-btn editorial-btn-outline btn-sm py-2 px-3" target="_blank">
+            <i class="bi bi-file-code"></i> JSON Schema
+          </a>
+          <div class="dropdown">
+            <button class="editorial-btn editorial-btn-outline btn-sm py-2 px-3 dropdown-toggle font-mono" type="button" id="exportIocDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-shield-lock me-1"></i> Export IOCs
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark font-mono small" aria-labelledby="exportIocDropdownBtn" style="background: var(--bg-void); border: 1px solid var(--border-hairline);">
+              <li><a class="dropdown-item text-primary" href="#" onclick="downloadInvestigationIoc('stix')"><i class="bi bi-filetype-json me-2"></i>STIX 2.1 Bundle (OASIS)</a></li>
+              <li><a class="dropdown-item text-danger" href="#" onclick="downloadInvestigationIoc('snort')"><i class="bi bi-terminal me-2"></i>Snort / Suricata Rules</a></li>
+              <li><a class="dropdown-item text-warning" href="#" onclick="downloadInvestigationIoc('splunk')"><i class="bi bi-code me-2"></i>Splunk SPL Query</a></li>
+              <li><a class="dropdown-item text-success" href="#" onclick="downloadInvestigationIoc('csv')"><i class="bi bi-table me-2"></i>Normalized IOC CSV</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VirusTotal-Grade Executive Consensus Grid (Top Row) -->
+    <div class="row g-4 mb-5">
+      <!-- Left: VirusTotal-Style Circular Gauge & Big Verdict -->
+      <div class="col-lg-5">
+        <div class="horror-card h-100 d-flex flex-column justify-content-between p-4" style="background: radial-gradient(circle at top right, rgba(181, 18, 27, 0.12), transparent 70%);">
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="font-mono text-blood small text-uppercase">// CONSENSUS DETECTION RATIO</span>
+              <span class="badge font-mono small" id="resOverallVerdictBadge" style="background: var(--blood-crimson); color: #fff; font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+                CLEAN
+              </span>
+            </div>
+
+            <!-- VT Circular Detection Arc HUD -->
+            <div class="d-flex align-items-center justify-content-center my-4">
+              <div class="position-relative d-inline-flex align-items-center justify-content-center" style="width: 170px; height: 170px;">
+                <svg width="170" height="170" viewBox="0 0 120 120" style="transform: rotate(-90deg);">
+                  <!-- Background circle track -->
+                  <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.08)" stroke-width="9" fill="none" />
+                  <!-- Dynamic detection stroke -->
+                  <circle id="vtGaugeCircle" cx="60" cy="60" r="50" stroke="var(--blood-bright)" stroke-width="9" stroke-linecap="round" fill="none"
+                          stroke-dasharray="314.159" stroke-dashoffset="314.159" style="transition: stroke-dashoffset 1s ease-out, stroke 0.4s ease;" />
+                </svg>
+                <div class="position-absolute text-center" style="transform: rotate(0deg);">
+                  <div class="font-headline fs-2 fw-bold text-bone mb-0" id="resRatioMain">0 / 68</div>
+                  <div class="font-mono text-ash" style="font-size: 0.68rem; letter-spacing: 0.05em;">SECURITY VENDORS</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ratio Breakdown Stats Grid -->
+          <div class="border-top border-hairline pt-3 mt-3">
+            <div class="row text-center g-2 font-mono">
+              <div class="col-4">
+                <div class="p-2 rounded" style="background: rgba(227, 38, 54, 0.1); border: 1px solid rgba(227, 38, 54, 0.25);">
+                  <div class="fs-5 fw-bold text-danger" id="resMaliciousCount">0</div>
+                  <div class="text-ash" style="font-size: 0.7rem;">MALICIOUS</div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="p-2 rounded" style="background: rgba(198, 155, 66, 0.1); border: 1px solid rgba(198, 155, 66, 0.25);">
+                  <div class="fs-5 fw-bold text-warning" id="resSuspiciousCount">0</div>
+                  <div class="text-ash" style="font-size: 0.7rem;">SUSPICIOUS</div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="p-2 rounded" style="background: rgba(101, 155, 120, 0.1); border: 1px solid rgba(101, 155, 120, 0.25);">
+                  <div class="fs-5 fw-bold text-success" id="resCleanCount">68</div>
+                  <div class="text-ash" style="font-size: 0.7rem;">CLEAN</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Risk Score & Attack Surface Summary -->
+      <div class="col-lg-7">
+        <div class="horror-card h-100 d-flex flex-column justify-content-between p-4">
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="font-mono text-blood small text-uppercase">// HEURISTIC RISK CLASSIFICATION</span>
+              <span class="font-mono text-dim small">SCORE ENGINE v5.0</span>
+            </div>
+
+            <!-- Risk Score Metric -->
+            <div class="d-flex align-items-baseline gap-3 mb-2">
+              <span class="font-headline display-4 fw-bold text-bone" id="resRiskScoreBig">0</span>
+              <span class="font-mono text-ash fs-5">/ 100 RISK INDEX</span>
+              <span class="badge font-mono ms-auto" id="resRiskRatingBadge" style="background: rgba(101, 155, 120, 0.2); color: var(--threat-low); border: 1px solid var(--threat-low); font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+                LOW RISK
+              </span>
+            </div>
+
+            <!-- Progress Meter Bar -->
+            <div class="progress mb-4" style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+              <div id="resRiskBar" class="progress-bar" role="progressbar" style="width: 0%; background: var(--threat-low); transition: width 0.8s ease;"></div>
+            </div>
+
+            <!-- Telemetry & Threat Highlights -->
+            <div class="row g-3 font-mono small">
+              <div class="col-sm-6">
+                <div class="p-3 rounded" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                  <div class="text-dim text-uppercase mb-1">PRIMARY RESOLVED IP</div>
+                  <div class="text-bone fw-bold fs-6 d-flex align-items-center justify-content-between">
+                    <span id="resTargetIp">127.0.0.1</span>
+                    <button class="btn btn-link p-0 text-blood" title="Copy IP" onclick="copyTextToClipboard(document.getElementById('resTargetIp').innerText, 'IP Copied')">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-6">
+                <div class="p-3 rounded" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                  <div class="text-dim text-uppercase mb-1">DGA ENTROPY METRIC</div>
+                  <div class="text-bone fw-bold fs-6 d-flex align-items-center justify-content-between">
+                    <span id="resTargetEntropy">2.45 bits</span>
+                    <span class="badge" id="resEntropyBadge" style="background: rgba(255,255,255,0.08); color: var(--text-ash);">NORMAL</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="p-3 rounded" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                  <div class="text-dim text-uppercase mb-1">TRIGGERED THREAT SIGNATURES</div>
+                  <div id="resTriggeredSignaturesList" class="d-flex flex-wrap gap-1 mt-1">
+                    <span class="badge bg-dark text-muted font-mono">None (Clean Profile)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-top border-hairline pt-3 mt-4 d-flex justify-content-between align-items-center text-ash font-mono small">
+            <span>RFC-1918 SSRF CONTAINMENT: <span class="text-success">ENFORCED</span></span>
+            <span id="resScanTimestamp">--:--:-- IST</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI SOC Incident Commander Executive Briefing Card -->
+    <div class="horror-card mb-4" id="aiCopilotCard" style="display: none; background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 70%); border-left: 3px solid var(--blood-bright);">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-2 border-bottom border-hairline">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-robot text-blood fs-5"></i>
+          <span class="font-headline text-bone fs-5 mb-0">AI SOC THREAT COPILOT &bull; EXECUTIVE INTELLIGENCE BRIEF</span>
+        </div>
+        <div class="d-flex align-items-center gap-2 font-mono small">
+          <span class="badge" id="aiSeverityBadge" style="background: var(--blood-crimson); color: #fff;">SEV-1 CRITICAL</span>
+          <span class="badge bg-dark border border-hairline text-dim" id="aiUrgencyBadge">CONTAINMENT REQUIRED</span>
+        </div>
+      </div>
+
+      <div class="row g-3 font-mono">
+        <div class="col-lg-8">
+          <div class="p-3 rounded mb-0 h-100" style="background: var(--bg-void); border: 1px solid var(--border-hairline);">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="text-dim small text-uppercase">THREAT ARCHETYPE:</span>
+              <span class="text-blood fw-bold small" id="aiArchetypeLabel">Threat Assessment</span>
+            </div>
+            <div class="text-ash small mb-2" id="aiActorProfile">-</div>
+            <div class="text-bone small" style="line-height: 1.6; white-space: pre-line;" id="aiNarrativeText">
+              Synthesizing heuristic indicators...
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="p-3 rounded h-100" style="background: var(--bg-panel); border: 1px solid var(--border-hairline);">
+            <div class="text-dim small text-uppercase mb-2 font-headline">// ACTIONABLE IR DIRECTIVES</div>
+            <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small text-ash" id="aiDirectivesList">
+              <!-- Populated via JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Navigation Tabs -->
+    <div class="horror-card mb-4 p-2">
+      <ul class="nav nav-pills custom-audit-tabs" id="scannerTabList" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active font-mono" id="tab-vendors-btn" data-bs-toggle="pill" data-bs-target="#tab-vendors-content" type="button" role="tab">
+            <i class="bi bi-grid-3x3-gap me-1"></i> SECURITY VENDORS (68)
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link font-mono" id="tab-attacks-btn" data-bs-toggle="pill" data-bs-target="#tab-attacks-content" type="button" role="tab">
+            <i class="bi bi-shield-x me-1"></i> ATTACK VECTOR FORENSICS <span class="badge bg-danger ms-1" id="resAttackBadgeCount">0</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link font-mono" id="tab-mitigation-btn" data-bs-toggle="pill" data-bs-target="#tab-mitigation-content" type="button" role="tab">
+            <i class="bi bi-terminal me-1"></i> SOC MITIGATION PLAYBOOK
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link font-mono" id="tab-mitre-btn" data-bs-toggle="pill" data-bs-target="#tab-mitre-content" type="button" role="tab">
+            <i class="bi bi-diagram-2 me-1"></i> MITRE &amp; OWASP MATRIX
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link font-mono" id="tab-anatomy-btn" data-bs-toggle="pill" data-bs-target="#tab-anatomy-content" type="button" role="tab">
+            <i class="bi bi-cpu me-1"></i> TARGET ANATOMY
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link font-mono" id="tab-graph-btn" data-bs-toggle="pill" data-bs-target="#tab-graph-content" type="button" role="tab">
+            <i class="bi bi-diagram-3 me-1"></i> THREAT GRAPH
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link font-mono" id="tab-preview-btn" data-bs-toggle="pill" data-bs-target="#tab-preview-content" type="button" role="tab">
+            <i class="bi bi-display me-1"></i> SAFE PREVIEW
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Tab Contents -->
+    <div class="tab-content" id="scannerTabContent">
+      <!-- TAB 1: 68 Security Vendors Grid -->
+      <div class="tab-pane fade show active" id="tab-vendors-content" role="tabpanel">
+        <div class="horror-card mb-5">
+          <!-- Filter Controls -->
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom border-hairline">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <span class="font-mono text-dim small me-1">FILTER ENGINES:</span>
+              <button class="editorial-btn editorial-btn-outline btn-sm py-1 px-3 active" id="filterBtnAll" onclick="filterVendors('all')">
+                ALL (<span id="filterCountAll">68</span>)
+              </button>
+              <button class="editorial-btn editorial-btn-outline btn-sm py-1 px-3 text-danger" id="filterBtnMalicious" onclick="filterVendors('malicious')">
+                MALICIOUS (<span id="filterCountMalicious">0</span>)
+              </button>
+              <button class="editorial-btn editorial-btn-outline btn-sm py-1 px-3 text-warning" id="filterBtnSuspicious" onclick="filterVendors('suspicious')">
+                SUSPICIOUS (<span id="filterCountSuspicious">0</span>)
+              </button>
+              <button class="editorial-btn editorial-btn-outline btn-sm py-1 px-3 text-success" id="filterBtnClean" onclick="filterVendors('clean')">
+                CLEAN (<span id="filterCountClean">68</span>)
+              </button>
+            </div>
+
+            <div class="position-relative" style="min-width: 260px;">
+              <input type="text" id="vendorSearchInput" class="form-control form-control-sm font-mono text-bone"
+                     placeholder="Search vendor (e.g. Kaspersky)..." oninput="searchVendors(this.value)"
+                     style="background: var(--bg-void); border: 1px solid var(--border-hairline); border-radius: 4px; padding-left: 2rem;">
+              <i class="bi bi-search position-absolute text-ash" style="top: 7px; left: 10px; font-size: 0.8rem;"></i>
+            </div>
+          </div>
+
+          <!-- 68 Vendor Cards Grid -->
+          <div class="row g-3" id="vendorDetectionsGrid">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Attack Vector Forensics -->
+      <div class="tab-pane fade" id="tab-attacks-content" role="tabpanel">
+        <div class="horror-card mb-5">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <span class="font-mono text-blood small text-uppercase">// CYBER ATTACK VECTOR DIAGNOSTICS</span>
+              <h3 class="font-headline text-bone fs-4 mt-1 mb-0">COMPREHENSIVE EXPLOIT &amp; THREAT VECTOR ANALYSIS</h3>
+            </div>
+            <span class="font-mono text-dim small">7 VECTORS PROBED</span>
+          </div>
+
+          <div class="row g-4" id="attackVectorsContainer">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: SOC Mitigation Playbook -->
+      <div class="tab-pane fade" id="tab-mitigation-content" role="tabpanel">
+        <div class="horror-card mb-5">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <span class="font-mono text-blood small text-uppercase">// ACTIONABLE SOC INCIDENT RESPONSE</span>
+              <h3 class="font-headline text-bone fs-4 mt-1 mb-0">DEFENSIVE FIREWALL &amp; IDS DIRECTIVES</h3>
+            </div>
+            <span class="font-mono text-dim small">AUTOMATED SYNTHESIS</span>
+          </div>
+
+          <div class="row g-4" id="mitigationRulesContainer">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: MITRE ATT&CK & OWASP Matrix Alignment -->
+      <div class="tab-pane fade" id="tab-mitre-content" role="tabpanel">
+        <div class="horror-card mb-5">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom border-hairline">
+            <div>
+              <span class="font-mono text-blood small text-uppercase">// ENTERPRISE THREAT FRAMEWORK CORRELATION</span>
+              <h3 class="font-headline text-bone fs-4 mt-1 mb-0">MITRE ATT&amp;CK &amp; OWASP TOP 10 MATRIX</h3>
+              <p class="text-ash small mb-0 mt-1">Direct correlation of observed attack vectors to official MITRE tactics, techniques, and OWASP application security standards.</p>
+            </div>
+            <span class="badge font-mono border border-hairline p-2" id="mitrePostureBadge" style="background: rgba(227, 38, 54, 0.15); color: var(--blood-bright);">
+              ANALYZING MATRIX...
+            </span>
+          </div>
+
+          <div class="row g-4 mb-4" id="mitreTacticsContainer">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- OWASP Section -->
+          <div class="p-4 rounded mb-4" style="background: var(--bg-void); border: 1px solid var(--border-hairline);">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="font-headline text-bone">// CORRELATED OWASP TOP 10 (2021) VECTORS</span>
+              <span class="font-mono text-dim small">APPLICATION SECURITY DEFICIENCIES</span>
+            </div>
+            <div class="d-flex flex-wrap gap-2" id="owaspBadgesContainer">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+
+          <!-- Defense Mitigation Framework Directive -->
+          <div class="p-3 rounded font-mono small" style="background: var(--bg-panel); border: 1px solid var(--border-hairline);">
+            <div class="text-dim text-uppercase mb-1"><i class="bi bi-shield-check text-success me-1"></i> DEFENSIVE MITIGATION RECOMMENDATION:</div>
+            <div class="text-bone" id="mitreMitigationFrameworkText">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: Target Anatomy -->
+      <div class="tab-pane fade" id="tab-anatomy-content" role="tabpanel">
+        <div class="horror-card mb-5">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <span class="font-mono text-blood small text-uppercase">// LOW-LEVEL INFRASTRUCTURE TELEMETRY</span>
+              <h3 class="font-headline text-bone fs-4 mt-1 mb-0">TARGET STRUCTURAL ANATOMY</h3>
+            </div>
+            <span class="font-mono text-dim small">NETWORK &amp; DOMAIN SPEC</span>
+          </div>
+
+          <div class="row g-4 font-mono">
+            <div class="col-md-6">
+              <div class="p-3 rounded mb-3" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                <div class="text-dim small text-uppercase mb-1">CANONICAL HOSTNAME</div>
+                <div class="text-bone fs-6 user-select-all" id="resAnatomyHostname">-</div>
+              </div>
+              <div class="p-3 rounded mb-3" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                <div class="text-dim small text-uppercase mb-1">PRIMARY RESOLVED IP (RFC PROTECTED)</div>
+                <div class="text-bone fs-6 user-select-all" id="resAnatomyIp">-</div>
+              </div>
+              <div class="p-3 rounded" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                <div class="text-dim small text-uppercase mb-1">PORT &amp; TRANSPORT PROTOCOL</div>
+                <div class="text-bone fs-6" id="resAnatomyPort">-</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="p-3 rounded mb-3" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                <div class="text-dim small text-uppercase mb-1">SHANNON ENTROPY COEFFICIENT</div>
+                <div class="text-bone fs-6" id="resAnatomyEntropy">-</div>
+                <div class="text-ash small mt-1">High entropy (&gt; 3.6) correlates with Algorithmically Generated Domains (DGA) used by Ransomware.</div>
+              </div>
+              <div class="p-3 rounded" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                <div class="text-dim small text-uppercase mb-1">ACTIVE INVESTIGATION RECORD ID</div>
+                <div class="text-bone fs-6" id="resAnatomyInvId">-</div>
+                <div class="text-ash small mt-1">Logged into SQLite WAL database under type <code>threat_scan</code>.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: Interactive Threat Graph & Topology -->
+      <div class="tab-pane fade" id="tab-graph-content" role="tabpanel">
+        <div class="horror-card mb-5">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom border-hairline">
+            <div>
+              <span class="font-mono text-blood small text-uppercase">// FORCE-DIRECTED NETWORK TOPOLOGY</span>
+              <h3 class="font-headline text-bone fs-4 mt-1 mb-0">INTERACTIVE THREAT GRAPH</h3>
+              <p class="text-ash small mb-0 mt-1">Live physics simulation mapping Target Root &bull; Redirect Cascade &bull; Authoritative DNS &bull; Threat Surfaces.</p>
+            </div>
+
+            <!-- Graph Controls Bar -->
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <div class="btn-group btn-group-sm font-mono me-2" role="group">
+                <button type="button" class="editorial-btn editorial-btn-outline btn-sm active" id="graphFilterAll" onclick="setThreatGraphFilter('all')">ALL</button>
+                <button type="button" class="editorial-btn editorial-btn-outline btn-sm" id="graphFilterTarget" onclick="setThreatGraphFilter('target')">TARGET</button>
+                <button type="button" class="editorial-btn editorial-btn-outline btn-sm" id="graphFilterInfra" onclick="setThreatGraphFilter('ip')">INFRASTRUCTURE</button>
+                <button type="button" class="editorial-btn editorial-btn-outline btn-sm" id="graphFilterThreat" onclick="setThreatGraphFilter('threat')">THREATS</button>
+              </div>
+
+              <div class="btn-group btn-group-sm font-mono" role="group">
+                <button type="button" class="editorial-btn editorial-btn-outline btn-sm" onclick="zoomThreatGraphIn()" title="Zoom In">
+                  <i class="bi bi-zoom-in"></i>
+                </button>
+                <button type="button" class="editorial-btn editorial-btn-outline btn-sm" onclick="zoomThreatGraphOut()" title="Zoom Out">
+                  <i class="bi bi-zoom-out"></i>
+                </button>
+                <button type="button" class="editorial-btn editorial-btn-outline btn-sm" onclick="recenterThreatGraph()" title="Recenter Topology">
+                  <i class="bi bi-arrows-fullscreen"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Canvas & Overlays Container -->
+          <div class="position-relative overflow-hidden rounded border border-hairline" style="height: 540px; background: radial-gradient(circle at center, rgba(30, 41, 59, 0.4) 0%, rgba(10, 10, 15, 0.95) 100%);">
+            <canvas id="threatTopologyCanvas" style="display: block; width: 100%; height: 100%; cursor: grab;"></canvas>
+
+            <!-- Floating Hover Tooltip -->
+            <div id="graphNodeTooltip" class="position-absolute p-2 rounded shadow-lg font-mono"
+                 style="display: none; pointer-events: none; background: rgba(14, 11, 14, 0.95); border: 1px solid var(--border-hairline); backdrop-filter: blur(8px); z-index: 10; top: 16px; left: 16px; min-width: 200px; max-width: 280px;">
+            </div>
+
+            <!-- Floating Node Inspector Drawer (Click on Node) -->
+            <div id="graphNodeInspector" class="position-absolute p-3 rounded shadow-lg font-mono"
+                 style="display: none; background: rgba(14, 11, 14, 0.97); border: 1px solid var(--border-hairline); backdrop-filter: blur(12px); z-index: 15; top: 16px; right: 16px; width: 320px; max-height: calc(100% - 32px); overflow-y: auto;">
+            </div>
+
+            <!-- Legend Pills Overlay at Bottom-Left -->
+            <div class="position-absolute bottom-0 start-0 p-3 d-flex flex-wrap gap-2" style="z-index: 5; pointer-events: none;">
+              <span class="badge font-mono" style="background: rgba(59, 130, 246, 0.25); border: 1px solid #3B82F6; color: #93C5FD;">
+                <i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i> Target
+              </span>
+              <span class="badge font-mono" style="background: rgba(249, 115, 22, 0.25); border: 1px solid #F97316; color: #FDBA74;">
+                <i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i> Redirect Hop
+              </span>
+              <span class="badge font-mono" style="background: rgba(16, 185, 129, 0.25); border: 1px solid #10B981; color: #6EE7B7;">
+                <i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i> Resolved IP
+              </span>
+              <span class="badge font-mono" style="background: rgba(168, 85, 247, 0.25); border: 1px solid #A855F7; color: #D8B4FE;">
+                <i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i> Nameserver
+              </span>
+              <span class="badge font-mono" style="background: rgba(239, 68, 68, 0.25); border: 1px solid #EF4444; color: #FCA5A5;">
+                <i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i> Exploit Vector
+              </span>
+            </div>
+
+            <div class="position-absolute bottom-0 end-0 p-2 text-dim font-mono small" style="font-size: 10px; pointer-events: none;">
+              <i class="bi bi-hand-index-thumb me-1"></i> Drag to move &bull; Scroll to zoom &bull; Click node for forensics
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: Safe Headless Visual Preview -->
+      <div class="tab-pane fade" id="tab-preview-content" role="tabpanel">
+        <div class="horror-card mb-5">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom border-hairline">
+            <div>
+              <span class="font-mono text-blood small text-uppercase">// ZERO-TRUST SANDBOX ISOLATION</span>
+              <h3 class="font-headline text-bone fs-4 mt-1 mb-0">SAFE HEADLESS VISUAL PREVIEW &amp; DOM DISSECTOR</h3>
+              <p class="text-ash small mb-0 mt-1">RFC-1918 SSRF-contained snapshot with automated credential phishing form discovery and script neutralization.</p>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <button class="editorial-btn editorial-btn-outline btn-sm font-mono" id="btnRefreshPreview" onclick="refreshSafePreview()">
+                <i class="bi bi-arrow-clockwise me-1"></i> RE-FETCH PREVIEW
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading state for preview -->
+          <div id="previewLoadingState" class="text-center py-5 font-mono" style="display: none;">
+            <div class="spinner-border text-danger mb-3" role="status"></div>
+            <div class="text-bone">ISOLATING &amp; RENDERING SAFE HEADLESS SNAPSHOT...</div>
+            <div class="text-ash small mt-1">Executing strict sanitization and credential telemetry checks...</div>
+          </div>
+
+          <!-- Preview Content Container -->
+          <div id="previewDataContainer">
+            <!-- Telemetry Bar -->
+            <div class="row g-3 mb-4 font-mono small">
+              <div class="col-md-3">
+                <div class="p-3 rounded h-100" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                  <div class="text-dim text-uppercase mb-1">HTTP STATUS &amp; PROTOCOL</div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success" id="previewHttpStatusBadge">200 OK</span>
+                    <span class="text-bone" id="previewProtocol">HTTPS</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="p-3 rounded h-100" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                  <div class="text-dim text-uppercase mb-1">DOM PAGE TITLE</div>
+                  <div class="text-bone text-truncate" id="previewPageTitle" title="-">-</div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="p-3 rounded h-100" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                  <div class="text-dim text-uppercase mb-1">HTTP SERVER BANNER</div>
+                  <div class="text-bone text-truncate" id="previewServerBanner">-</div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="p-3 rounded h-100" style="background: var(--bg-elevated); border: 1px solid var(--border-hairline);">
+                  <div class="text-dim text-uppercase mb-1">CREDENTIAL HARVESTING RISK</div>
+                  <div id="previewPhishingBadge">
+                    <span class="badge bg-secondary">ANALYZING FORMS...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Telemetry Alert (if password inputs found) -->
+            <div id="previewFormAlert" class="mb-4" style="display: none;">
+              <!-- Populated if password/login inputs detected -->
+            </div>
+
+            <!-- Preview Toggle Tabs: Rendered Frame vs Raw HTML vs Forms -->
+            <ul class="nav nav-pills custom-audit-tabs mb-3 font-mono" id="previewSubTabList" role="tablist">
+              <li class="nav-item">
+                <button class="nav-link active py-1.5 px-3" id="subtab-view-btn" data-bs-toggle="pill" data-bs-target="#subtab-view-content" type="button">
+                  <i class="bi bi-display me-1"></i> SANDBOXED RENDER
+                </button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link py-1.5 px-3" id="subtab-forms-btn" data-bs-toggle="pill" data-bs-target="#subtab-forms-content" type="button">
+                  <i class="bi bi-input-cursor-text me-1"></i> FORM FORENSICS (<span id="previewFormCountBadge">0</span>)
+                </button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link py-1.5 px-3" id="subtab-html-btn" data-bs-toggle="pill" data-bs-target="#subtab-html-content" type="button">
+                  <i class="bi bi-code-slash me-1"></i> SANITIZED DOM (HTML)
+                </button>
+              </li>
+            </ul>
+
+            <div class="tab-content" id="previewSubTabContent">
+              <!-- Subtab 1: Isolated Sandboxed Iframe -->
+              <div class="tab-pane fade show active" id="subtab-view-content" role="tabpanel">
+                <div class="rounded border border-hairline overflow-hidden position-relative" style="background: #ffffff; min-height: 520px;">
+                  <iframe id="previewSandboxIframe"
+                          sandbox="allow-same-origin"
+                          style="width: 100%; height: 560px; border: none; background: #ffffff; display: block;"
+                          title="Sentinel-X Isolated DOM Snapshot"></iframe>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 font-mono text-dim small">
+                  <span><i class="bi bi-shield-lock-fill text-success me-1"></i> Sandboxed via <code>sandbox="allow-same-origin"</code> (Zero Script Execution Permitted).</span>
+                  <span id="previewByteSize">-</span>
+                </div>
+              </div>
+
+              <!-- Subtab 2: Form Forensics -->
+              <div class="tab-pane fade" id="subtab-forms-content" role="tabpanel">
+                <div id="previewFormsContainer" class="d-flex flex-column gap-3 font-mono">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+
+              <!-- Subtab 3: Raw HTML -->
+              <div class="tab-pane fade" id="subtab-html-content" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="font-mono text-dim small">SANITIZED DOM TREE (SCRIPTS REMOVED):</span>
+                  <button class="editorial-btn editorial-btn-outline btn-sm py-1 px-2.5 font-mono" onclick="copyPreviewHtml()">
+                    <i class="bi bi-clipboard me-1"></i> COPY RAW HTML
+                  </button>
+                </div>
+                <pre id="previewRawHtmlCode" class="p-3 rounded font-mono small text-bone user-select-all mb-0"
+                     style="background: var(--bg-void); border: 1px solid var(--border-hairline); max-height: 480px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;"></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Modal: Multi-Target Batch Threat Scanner -->
+<div class="modal fade" id="batchScannerModal" tabindex="-1" aria-labelledby="batchScannerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content horror-card font-mono">
+      <div class="d-flex justify-content-between align-items-center border-bottom border-hairline pb-3 mb-3">
+        <div>
+          <span class="text-blood small text-uppercase">// CONCURRENT RECON &bull; BULK MATRIX</span>
+          <h4 class="font-headline text-bone mb-0" id="batchScannerModalLabel">MULTI-TARGET BATCH THREAT SCANNER</h4>
+        </div>
+        <button type="button" class="close-index-btn" data-bs-dismiss="modal" aria-label="Close">CLOSE [ESC]</button>
+      </div>
+
+      <div class="modal-body p-0">
+        <p class="text-ash small mb-3">
+          Paste multiple URLs, domains, or IP addresses (one per line or comma-separated, max 20 targets).
+          Sentinel-X will orchestrate a concurrent thread-pool scan across all 68 security engines.
+        </p>
+
+        <div class="mb-3">
+          <textarea id="batchTargetsInput" class="form-control font-mono text-bone small" rows="4"
+                    placeholder="https://wikipedia.org&#10;http://paypal.com@verify-auth.top/login&#10;104.244.42.1&#10;http://suspicious-test.xyz/dropper.exe"
+                    style="background: var(--bg-void); border: 1px solid var(--border-hairline); border-radius: 4px;"></textarea>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="d-flex gap-2">
+            <button type="button" class="editorial-btn btn-sm" id="btnRunBatchScan" onclick="runBatchScan()">
+              <i class="bi bi-play-circle me-1"></i> ENGAGE BATCH SCAN
+            </button>
+            <button type="button" class="editorial-btn editorial-btn-outline btn-sm" onclick="populateBatchSample()">
+              LOAD SAMPLES
+            </button>
+          </div>
+          <span class="text-dim small" id="batchProgressLabel">Awaiting queue...</span>
+        </div>
+
+        <!-- Live Batch Matrix Results Table -->
+        <div id="batchResultsTableContainer" style="display: none;">
+          <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom border-hairline">
+            <span class="font-headline text-bone">// BATCH THREAT MATRIX</span>
+            <div class="d-flex gap-2 small">
+              <span class="text-danger fw-bold" id="batchMalCount">0 Malicious</span>
+              <span class="text-ash">&bull;</span>
+              <span class="text-warning fw-bold" id="batchSuspCount">0 Suspicious</span>
+              <span class="text-ash">&bull;</span>
+              <span class="text-success fw-bold" id="batchCleanCount">0 Clean</span>
+            </div>
+          </div>
+
+          <div class="horror-table-container" style="max-height: 380px; overflow-y: auto;">
+            <table class="horror-table font-mono small align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>TARGET HOSTNAME / URI</th>
+                  <th>VERDICT</th>
+                  <th>SCORE</th>
+                  <th>VENDORS</th>
+                  <th>TOP FINDING / SIGNATURE</th>
+                  <th class="text-end">ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="batchMatrixTbody">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-top border-hairline pt-3 mt-3 d-flex justify-content-end">
+        <button type="button" class="editorial-btn editorial-btn-outline btn-sm" data-bs-dismiss="modal">Dismiss</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/threat_graph.js') }}"></script>
+<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+{% endblock %}

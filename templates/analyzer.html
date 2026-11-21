@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Subject Under Investigation | SENTINEL-X{% endblock %}
+{% block breadcrumb %}SUBJECT UNDER INVESTIGATION{% endblock %}
+
+{% block content %}
+<div class="fade-in-up">
+  <!-- Top Cinematic Horror Hero Banner -->
+  <div class="horror-module-banner mb-4">
+    <div class="module-banner-backdrop">
+      <img src="{{ url_for('static', filename='images/horror_forensic_lab.jpg') }}" alt="Disturbing Forensic Laboratory" class="module-banner-img ken-burns-subtle">
+      <div class="module-banner-overlay"></div>
+    </div>
+    <div class="module-banner-content">
+      <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
+        <div>
+          <div class="vertical-classified-tag mb-1">// FORENSIC RECONNAISSANCE &bull; HEURISTIC ENGINE</div>
+          <h1 class="workspace-hero-heading text-bone mt-1 mb-0">SUBJECT UNDER INVESTIGATION</h1>
+        </div>
+        <span class="badge font-mono text-ash d-none d-md-inline-block" style="background: rgba(14, 11, 12, 0.85); border: 1px solid var(--border-hairline);">
+          ZERO-EXPLOIT PASSIVE PROBE &bull; SSRF ISOLATION
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prominent URL Input Integrated into Dark Cinematic Panel -->
+  <div class="horror-card position-relative overflow-hidden mb-5">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <span class="font-mono text-blood small text-uppercase">// TARGET HOSTNAME OR FULL URI</span>
+      <span class="font-mono text-dim small">RFC-3986 COMPLIANT</span>
+    </div>
+
+    <form id="urlAnalyzerForm" onsubmit="event.preventDefault(); runUrlAnalysis();">
+      <div class="oversized-domain-input-box">
+        <span class="font-mono text-blood fs-3">uri://</span>
+        <input type="text" id="targetUrlInput" class="oversized-domain-input" placeholder="target-domain.org/path or http://bit.ly/..." autocomplete="off" required>
+        <button type="submit" id="analyzeUrlBtn" class="editorial-btn px-4 flex-shrink-0">
+          <i class="bi bi-search me-1"></i> EXAMINE TARGET
+        </button>
+        <button type="button" class="editorial-btn editorial-btn-outline flex-shrink-0" onclick="clearUrlAnalyzerForm()">
+          CLEAR
+        </button>
+      </div>
+    </form>
+
+    <!-- Tactical Scenario Presets -->
+    <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+      <span class="text-ash small font-mono me-1">INVESTIGATION PRESETS:</span>
+      <button class="scenario-raw-tag" onclick="setUrlTarget('https://github.com/trending', true)">#GITHUB (VERIFIED)</button>
+      <button class="scenario-raw-tag" onclick="setUrlTarget('http://bit.ly/3sample', true)">#BIT.LY (SHORTENER)</button>
+      <button class="scenario-raw-tag" onclick="setUrlTarget('http://192.168.1.1:8080/admin', true)">#INTERNAL_IP (SSRF BLOCK)</button>
+      <button class="scenario-raw-tag" onclick="setUrlTarget('http://xn--appl-43d.com/login', true)">#PUNYCODE (DECEPTION)</button>
+      <button class="scenario-raw-tag" onclick="setUrlTarget('http://paypal.com@suspicious-bank-verify.net:8888/account/update_login.exe?auth=123%25', true)">#PHISHING_PAYLOAD</button>
+    </div>
+  </div>
+
+  <!-- During Scan: Full-Width Red Laser Line & Timeline Animation -->
+  <div id="urlLoadingOverlay" class="horror-card text-center p-5 mb-5 position-relative overflow-hidden" style="display: none; background: #080506; border-color: var(--blood-crimson);">
+    <div class="cinematic-scan-beam"></div>
+    <i class="bi bi-radioactive fs-1 text-blood d-block mb-3 surveillance-iris-pulse"></i>
+    <h3 class="font-headline text-bone text-uppercase mb-2" id="urlScannerStatus">DECONSTRUCTING URL STRUCTURE &amp; HEURISTICS...</h3>
+    <div class="text-ash font-mono small">
+      Evaluating RFC boundaries &bull; Querying authoritative DNS &bull; Probing redirect cascades &bull; Scoring heuristic threat vectors
+    </div>
+  </div>
+
+  <!-- Forensic Results Section: Editorial Split-Screen Layout -->
+  <div id="urlResultsSection" style="display: none;">
+    <!-- Subject Banner -->
+    <div class="horror-card mb-4" id="threatBannerCard">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="font-mono text-dim small">SUBJECT URI:</span>
+            <span class="badge bg-secondary font-mono small text-blood" id="resTargetScheme">HTTPS</span>
+          </div>
+          <div class="font-mono fs-4 text-bone fw-bold user-select-all text-truncate" style="max-width: 850px;" id="resFullUrlLabel">
+            https://target.com
+          </div>
+          <p class="text-ash small mt-1 mb-0" id="resSummaryText">
+            Automated heuristic risk evaluation completed.
+          </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <a id="downloadPdfDossierBtn" href="#" class="editorial-btn btn-sm py-2 px-3" target="_blank">
+            <i class="bi bi-file-earmark-pdf"></i> Export Vector PDF
+          </a>
+          <a id="exportJsonDossierBtn" href="#" class="editorial-btn editorial-btn-outline btn-sm py-2 px-3" target="_blank">
+            <i class="bi bi-file-code"></i> JSON Schema
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editorial Split-Screen -->
+    <div class="forensic-split-view mb-5">
+      <!-- LEFT: Huge Risk Score & Classification -->
+      <div class="horror-card d-flex flex-column justify-content-between mb-0">
+        <div>
+          <div class="d-flex justify-content-between align-items-center border-bottom border-hairline pb-2 mb-3">
+            <span class="font-mono text-blood small text-uppercase">// FORENSIC THREAT SCORE</span>
+            <span class="font-mono text-ash small" id="resIndicatorsCountBadge">0 Indicators</span>
+          </div>
+
+          <div class="py-3 text-center">
+            <div class="forensic-score-monolith text-blood" id="resRiskScore">0</div>
+            <div class="font-mono text-ash fs-6">OUT OF 100 MAXIMUM SEVERITY</div>
+            <div class="mt-3">
+              <span class="threat-status-tag low fs-6" id="resRiskBadge">BENIGN / LOW</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="horror-inset-box p-3 mt-4">
+          <div class="d-flex justify-content-between align-items-center font-mono small mb-1">
+            <span class="text-ash">VERDICT:</span>
+            <span class="text-blood fw-bold" id="resVerdictStatus">NOMINAL ASSET</span>
+          </div>
+          <div class="progress" style="height: 4px; background: rgba(181, 18, 27, 0.2);">
+            <div id="riskProgressBar" class="progress-bar" style="width: 0%; background: var(--threat-low);"></div>
+          </div>
+          <!-- Hidden gauge SVG hook to keep JS compatibility -->
+          <svg style="display:none;"><circle id="neonGaugeProgress" r="56"></circle></svg>
+          <div class="text-dim font-mono small mt-2" style="font-size: 0.7rem;">
+            Calculated via automated structural entropy, anti-spoofing heuristic rules, and DNS sanity constraints.
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: URL Structure Anatomy, IP/TLS & Heuristic Indicators -->
+      <div class="horror-card mb-0">
+        <div class="d-flex justify-content-between align-items-center border-bottom border-hairline pb-2 mb-3">
+          <span class="font-headline text-bone text-uppercase">// ANATOMICAL DECOMPOSITION</span>
+          <span class="font-mono text-ash small" id="urlLengthBadge">0 Chars</span>
+        </div>
+
+        <div class="d-flex flex-column gap-1 mb-4">
+          <div class="forensic-data-row">
+            <span class="row-label">PROTOCOL SCHEME:</span>
+            <span class="row-value font-mono text-blood" id="structScheme">https</span>
+          </div>
+          <div class="forensic-data-row">
+            <span class="row-label">FQDN HOSTNAME:</span>
+            <span class="row-value font-mono text-bone user-select-all" id="structHostname">target.com</span>
+          </div>
+          <div class="forensic-data-row">
+            <span class="row-label">SERVICE PORT:</span>
+            <span class="row-value font-mono" id="structPort">443 <span class="badge bg-secondary ms-1" id="structPortBadge">Standard</span></span>
+          </div>
+          <div class="forensic-data-row">
+            <span class="row-label">SUBDOMAIN DEPTH:</span>
+            <span class="row-value font-mono" id="structSubdomains">0 levels</span>
+          </div>
+          <div class="forensic-data-row">
+            <span class="row-label">PATH SEGMENT:</span>
+            <span class="row-value font-mono text-truncate" id="structPath">/</span>
+          </div>
+          <div class="forensic-data-row">
+            <span class="row-label">QUERY PARAMETERS:</span>
+            <div class="row-value font-mono">
+              <span id="structParamsCount" class="text-blood">0 detected</span>
+              <div id="queryParamsList" class="mt-1 small"></div>
+            </div>
+          </div>
+          <div class="forensic-data-row">
+            <span class="row-label">URI FRAGMENT:</span>
+            <span class="row-value font-mono text-dim" id="structFragment">None</span>
+          </div>
+        </div>
+
+        <!-- Host Intelligence Mini-Strip -->
+        <div class="d-flex justify-content-between align-items-center p-3 horror-inset-box font-mono small mb-4">
+          <div>
+            <span class="text-ash small">RESOLVED IP:</span>
+            <span class="text-blood fw-bold ms-1" id="hostPrimaryIp">0.0.0.0</span>
+          </div>
+          <div>
+            <span class="text-ash small">TLS STATE:</span>
+            <span class="ms-1" id="hostSslIssuer">Issuer: Active CA</span>
+            <span class="threat-status-tag low ms-1" style="font-size: 0.65rem;" id="hostSslValidityBadge">Valid</span>
+          </div>
+        </div>
+
+        <!-- Triggered Threat Indicators -->
+        <div class="border-top border-hairline pt-3">
+          <div class="font-headline text-bone text-uppercase fs-6 mb-3">// SUSPICIOUS HEURISTIC INDICATORS</div>
+          <div id="indicatorsContainer" class="d-flex flex-column gap-2">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: Redirect Chain Trajectory & Actionable Precautions -->
+    <div class="horror-card mb-4">
+      <div class="d-flex justify-content-between align-items-center border-bottom border-hairline pb-2 mb-3">
+        <span class="font-headline text-bone text-uppercase">// REDIRECT CHAIN TRAJECTORY</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="threat-status-tag low" id="redirectStatusFlag">Direct</span>
+          <a href="{{ url_for('redirects_page') }}" class="editorial-btn editorial-btn-outline btn-sm py-1 px-2.5">
+            Deep Trace <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div id="redirectChainContainer" class="d-flex flex-column gap-2 font-mono small mb-4">
+        <!-- Injected via JS -->
+      </div>
+
+      <div class="border-top border-hairline pt-3">
+        <div class="font-headline text-bone text-uppercase fs-6 mb-3">// DEFENSIVE PRECAUTIONS &amp; ADVISORIES</div>
+        <div id="precautionsList" class="d-flex flex-column gap-2 mb-3">
+          <!-- Injected via JS -->
+        </div>
+
+        <div class="horror-inset-box p-3 font-mono text-dim small">
+          <i class="bi bi-shield-exclamation text-blood me-1"></i>
+          <strong>FORENSIC ASSESSMENT NOTICE:</strong> This analysis represents an automated heuristic threat indicator rather than conclusive proof of hostile intent. Verification should always be performed within controlled sandboxes.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings | SENTINEL-X{% endblock %}
+{% block breadcrumb %}09 // PLATFORM TELEMETRY &amp; SETTINGS{% endblock %}
+
+{% block content %}
+<!-- Top Cinematic Horror Hero Banner -->
+<div class="horror-module-banner mb-4">
+  <div class="module-banner-backdrop">
+    <img src="{{ url_for('static', filename='images/horror_server_room.jpg') }}" alt="Subterranean Operations Rack" class="module-banner-img ken-burns-subtle">
+    <div class="module-banner-overlay"></div>
+  </div>
+  <div class="module-banner-content">
+    <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
+      <div>
+        <div class="vertical-classified-tag mb-1">CONFIGURATION CONTROL // OPERATIONAL PARAMETERS</div>
+        <h1 class="horror-glitch horror-font mb-1"><i class="bi bi-sliders text-blood"></i> PARANORMAL SYSTEM SETTINGS</h1>
+        <p class="text-ash mb-0" style="max-width: 650px;">Configure intelligence display ergonomics, network sensor timeouts, audio telemetry, and SSRF containment boundary policies.</p>
+      </div>
+      <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+        <span class="system-telemetry-pill">
+          <i class="bi bi-shield-check text-blood"></i> FIREWALL ACTIVE
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- General Preferences -->
+  <div class="col-12 col-lg-6">
+    <div class="horror-card mb-4" style="border-left: 3px solid var(--blood-crimson);">
+      <div class="horror-card-header">
+        <h5 class="horror-card-title text-blood">
+          <i class="bi bi-palette text-blood"></i> Display &amp; Telemetry Ergonomics
+        </h5>
+      </div>
+
+      <div class="d-flex flex-column gap-3">
+        <div class="d-flex align-items-center justify-content-between p-3 rounded horror-inset-box">
+          <div>
+            <div class="fw-bold text-bone small font-monospace">Interface Theme</div>
+            <div class="text-ash small">Choose between Obsidian Void, Cyberpunk 2077, Pinterest Neomorphism (Soft UI), Matrix Hacker, Spatial 3D Hologram, Monochrome Noir, Simple Normal Primary (Royal Blue), and High-Contrast Lab</div>
+          </div>
+          <select id="settingThemeSelect" class="form-select border font-monospace" style="width: 230px;">
+            <option value="dark">Obsidian Void</option>
+            <option value="cyberpunk">Cyberpunk 2077</option>
+            <option value="neomorphism">Pinterest Neomorphism</option>
+            <option value="hacker">Matrix Hacker</option>
+            <option value="3d">Spatial 3D Hologram</option>
+            <option value="monochrome">Monochrome Noir</option>
+            <option value="primary">Simple Normal Primary</option>
+            <option value="light">High-Contrast Lab</option>
+          </select>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between p-3 rounded horror-inset-box">
+          <div>
+            <div class="fw-bold text-bone small font-monospace">Synthesized Audio Alerts</div>
+            <div class="text-ash small">Generate Web Audio oscillator dissonance tones on Critical Threat detection</div>
+          </div>
+          <div class="form-check form-switch fs-5">
+            <input class="form-check-input" type="checkbox" id="settingAudioToggle">
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between p-3 rounded horror-inset-box">
+          <div>
+            <div class="fw-bold text-bone small font-monospace">Outbound Request Timeout</div>
+            <div class="text-ash small">Connection timeout per redirect hop and domain probe</div>
+          </div>
+          <select id="settingTimeoutSelect" class="form-select border font-monospace" style="width: 200px;">
+            <option value="3.0">3.0 Seconds</option>
+            <option value="5.0" selected>5.0 Seconds (Default)</option>
+            <option value="8.0">8.0 Seconds</option>
+          </select>
+        </div>
+
+        <div class="text-end pt-2">
+          <button class="editorial-btn btn-sm py-2 px-4" onclick="savePlatformSettings()">
+            <i class="bi bi-save"></i> Save Preferences
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active User-Agent Header Card -->
+    <div class="horror-card mb-0">
+      <div class="horror-card-header">
+        <h5 class="horror-card-title text-blood">
+          <i class="bi bi-globe text-blood"></i> Outbound User-Agent Signature
+        </h5>
+      </div>
+      <p class="text-ash small">Identifies Sentinel-X scanner to target servers to maintain transparent, accountable security research.</p>
+      <div class="code-snippet p-2.5 font-monospace text-blood small mb-0">
+        Mozilla/5.0 (Windows NT 10.0; Win64; x64) SentinelX-ParanormalScanner/5.0 (Investigation-Terminal; +https://sentinelx.local)
+      </div>
+    </div>
+  </div>
+
+  <!-- Security & Boundary Policy -->
+  <div class="col-12 col-lg-6">
+    <div class="horror-card mb-4" style="border-left: 3px solid #650B12;">
+      <div class="horror-card-header">
+        <h5 class="horror-card-title text-blood">
+          <i class="bi bi-shield-lock text-blood"></i> SSRF Boundary Containment Policy
+        </h5>
+        <span class="badge bg-success font-monospace">ACTIVE FIREWALL</span>
+      </div>
+      <p class="text-ash small">
+        Sentinel-X resolves every domain prior to making HTTP requests or TLS socket handshakes. If any resolved IP falls within the CIDR ranges below, the connection is immediately aborted.
+      </p>
+
+      <div class="horror-inset-box p-3 rounded font-monospace small" style="max-height: 220px; overflow-y: auto;">
+        <div class="text-danger fw-bold mb-1">&bull; RFC 1918 Private Ranges:</div>
+        <div class="text-ash ps-3 mb-2">10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16</div>
+
+        <div class="text-danger fw-bold mb-1">&bull; Loopback &amp; Localhost:</div>
+        <div class="text-ash ps-3 mb-2">127.0.0.0/8, ::1/128, localhost</div>
+
+        <div class="text-danger fw-bold mb-1">&bull; Link-Local &amp; Cloud Metadata:</div>
+        <div class="text-ash ps-3 mb-2">169.254.0.0/16 (includes 169.254.169.254 AWS/GCP/Azure metadata)</div>
+
+        <div class="text-danger fw-bold mb-1">&bull; Shared / Carrier-Grade NAT &amp; Reserved:</div>
+        <div class="text-ash ps-3">100.64.0.0/10, 240.0.0.0/4, 0.0.0.0/8</div>
+      </div>
+    </div>
+
+    <!-- Data Retention & Purge Policy Card -->
+    <div class="horror-card mb-0">
+      <div class="horror-card-header">
+        <h5 class="horror-card-title text-blood">
+          <i class="bi bi-database text-blood"></i> Intelligence Storage Management
+        </h5>
+      </div>
+      <p class="text-ash small">All records, indicators, and generated OSINT matrices are persisted in local SQLite with WAL journaling enabled.</p>
+      
+      <div class="d-flex align-items-center justify-content-between p-3 rounded horror-inset-box">
+        <div>
+          <div class="fw-bold text-bone small font-monospace">Purge All Intelligence Records</div>
+          <div class="text-ash small">Irreversibly delete all stored investigation history and metrics</div>
+        </div>
+        <button class="editorial-btn-outline text-danger border-danger btn-sm px-3" onclick="confirmPurgeFromSettings()">
+          <i class="bi bi-trash3 text-danger"></i> Purge Database
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Load saved theme
+  const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+  const themeSelect = document.getElementById("settingThemeSelect");
+  if (themeSelect) themeSelect.value = currentTheme;
+
+  // Load saved audio
+  const audioToggle = document.getElementById("settingAudioToggle");
+  if (audioToggle) {
+    audioToggle.checked = localStorage.getItem("sentinelx_audio_alerts") === "true";
+  }
+});
+
+function savePlatformSettings() {
+  const themeSelect = document.getElementById("settingThemeSelect");
+  if (themeSelect) {
+    const val = themeSelect.value;
+    document.documentElement.setAttribute("data-theme", val);
+    localStorage.setItem("sentinelx_theme", val);
+    if (typeof updateThemeIcon === "function") {
+      updateThemeIcon(val);
+    }
+    window.dispatchEvent(new CustomEvent("themeChanged", { detail: { theme: val } }));
+  }
+
+  const audioToggle = document.getElementById("settingAudioToggle");
+  if (audioToggle) {
+    localStorage.setItem("sentinelx_audio_alerts", audioToggle.checked);
+  }
+
+  showHorrorToast("Platform preferences saved successfully.", "success");
+}
+
+async function confirmPurgeFromSettings() {
+  if (!confirm("Are you certain you wish to purge the entire intelligence database? This action cannot be reversed.")) return;
+
+  try {
+    const resp = await fetch("/api/history/clear", { method: "POST" });
+    const json = await resp.json();
+    if (json.success) {
+      showHorrorToast("Intelligence database purged successfully.", "success");
+    }
+  } catch (err) {
+    showHorrorToast(`Purge failed: ${err.message}`, "danger");
+  }
+}
+</script>
+{% endblock %}

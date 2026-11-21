@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}The Investigation Room | SENTINEL-X{% endblock %}
+{% block breadcrumb %}THE INVESTIGATION ROOM{% endblock %}
+
+{% block content %}
+<!-- Editorial Asymmetric Hero Layout -->
+<section class="editorial-hero-grid fade-in-up">
+  <!-- LEFT AREA: Oversized Brutalist Typography & Primary Trigger -->
+  <div class="hero-left-column">
+    <div>
+      <div class="vertical-classified-tag font-mono">
+        CLASSIFIED SURVEILLANCE &bull; CONDUIT 0x66
+      </div>
+
+      <h1 class="hero-editorial-title">
+        THE INTERNET<br>
+        <span class="text-blood glitch-text">IS NOT WHAT</span><br>
+        IT SEEMS.
+      </h1>
+
+      <p class="hero-editorial-lead font-body">
+        Operating beyond conventional security perimeters, Sentinel-X deconstructs hostile redirects, phishing decoys, and anomalous digital footprints across public and shadow infrastructure.
+      </p>
+
+      <div class="mb-4">
+        <span class="badge font-mono text-blood" style="background: rgba(181, 18, 27, 0.15); border: 1px solid var(--border-hairline); font-size: 0.75rem; letter-spacing: 1px;">
+          ● ANOMALY RADAR: ONLINE // THREAT HARVESTING ACTIVE
+        </span>
+      </div>
+    </div>
+
+    <div class="hero-actions-cluster">
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('analyzer_page') }}" class="btn-editorial-primary">
+          <span>INITIATE INVESTIGATION</span>
+          <i class="bi bi-arrow-up-right fs-5"></i>
+        </a>
+        <a href="{{ url_for('scanner_page') }}" class="editorial-btn editorial-btn-outline d-inline-flex align-items-center">
+          <i class="bi bi-shield-shaded me-2 text-blood"></i>
+          <span>VIRUSTOTAL SCANNER</span>
+        </a>
+      </div>
+
+      <div class="scenario-tag-cluster mt-2">
+        <span class="text-ash small font-mono me-1">PRESETS:</span>
+        <a href="javascript:void(0)" class="scenario-raw-tag" onclick="fillAndExecute('https://cloudflare.com')">#CLOUDFLARE</a>
+        <a href="javascript:void(0)" class="scenario-raw-tag" onclick="fillAndExecute('https://github.com/trending')">#GITHUB</a>
+        <a href="javascript:void(0)" class="scenario-raw-tag" onclick="fillAndExecute('http://bit.ly/3sample')">#BIT.LY</a>
+        <a href="javascript:void(0)" class="scenario-raw-tag" onclick="fillAndExecute('http://xn--appl-43d.com/login')">#PUNYCODE</a>
+        <a href="javascript:void(0)" class="scenario-raw-tag" onclick="fillAndExecute('http://192.168.1.1:8080/admin')">#SSRF_BLOCK</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER AREA: Abstract Horror Surveillance Composition & Fast Input -->
+  <div class="hero-center-column">
+    <div class="horror-surveillance-stage">
+      <div class="concentric-ring ring-outer rotate-cw-slow"></div>
+      <div class="concentric-ring ring-middle rotate-ccw-slow"></div>
+      <div class="concentric-ring ring-calipers rotate-cw-fast"></div>
+
+      <!-- Surveillance Optical Iris -->
+      <div class="surveillance-ocular-core surveillance-iris-pulse">
+        <div class="pupil-slit"></div>
+      </div>
+    </div>
+
+    <!-- Integrated Center Scan Console -->
+    <div class="center-scan-console">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="font-mono text-blood small text-uppercase">// RAPID TARGET SCANNER</span>
+        <span class="font-mono text-dim small">RFC-SAFE</span>
+      </div>
+
+      <div class="aperture-input-group">
+        <input type="text" id="quickTargetInput" class="aperture-input" placeholder="INPUT URL OR DOMAIN..." autocomplete="off">
+        <select id="quickTargetType" class="aperture-input" style="max-width: 140px; display: none;">
+          <option value="url" selected>URL Forensics</option>
+        </select>
+        <button id="quickLaunchBtn" class="editorial-btn px-3" type="button">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+
+      <div class="text-dim font-mono small mt-2" style="font-size: 0.7rem;">
+        Direct sandbox routing with automated SSRF prevention.
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT AREA: Vertical Activity Stream & Compact System Telemetry -->
+  <div class="hero-right-column">
+    <div>
+      <div class="right-section-heading">
+        <span>// RECENT INVESTIGATIONS</span>
+        <span class="font-mono text-blood small">LIVE FEED</span>
+      </div>
+
+      <!-- Vertical Activity Feed Loaded via JS -->
+      <div class="activity-feed-vertical" id="recentInvestigationsFeed">
+        <div class="text-ash small text-center py-4 font-mono">
+          <i class="bi bi-arrow-repeat spin fs-5 d-block mb-2 text-blood"></i>
+          Interrogating telemetry archives...
+        </div>
+      </div>
+    </div>
+
+    <!-- Compact System Telemetry -->
+    <div class="system-status-box">
+      <div class="status-row">
+        <span class="text-ash">NODE CLEARANCE:</span>
+        <span class="text-blood fw-bold">LEVEL-5 CLASSIFIED</span>
+      </div>
+      <div class="status-row">
+        <span class="text-ash">SSRF BOUNDARIES:</span>
+        <span class="text-bone">ACTIVE FIREWALL</span>
+      </div>
+      <div class="status-row">
+        <span class="text-ash">JOURNALING:</span>
+        <span class="text-bone">SQLITE3 WAL MODE</span>
+      </div>
+      <div class="status-row">
+        <span class="text-ash">LATENCY:</span>
+        <span class="text-bone font-mono" id="statusLatency">12ms</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOTTOM AREA: Full-Width Horizontal Intelligence Metrics -->
+<section class="bottom-metrics-section">
+  <div class="d-flex justify-content-between align-items-baseline mb-3">
+    <h3 class="font-headline fs-2 text-bone text-uppercase mb-0">// AGGREGATE THREAT METRICS</h3>
+    <span class="font-mono text-ash small">PERSISTED TELEMETRY STORE</span>
+  </div>
+
+  <div class="metrics-horizontal-strip">
+    <div class="metric-monolith-card">
+      <span class="metric-index-tag">01. DOMAIN ASSETS</span>
+      <span class="metric-label-text">Domains Investigated</span>
+      <span class="monolith-num" id="statTotalDomains">0</span>
+    </div>
+
+    <div class="metric-monolith-card">
+      <span class="metric-index-tag">02. TARGET ANATOMY</span>
+      <span class="metric-label-text">URLs Examined</span>
+      <span class="monolith-num" id="statTotalUrls">0</span>
+    </div>
+
+    <div class="metric-monolith-card">
+      <span class="metric-index-tag">03. OSINT MATRIX</span>
+      <span class="metric-label-text">Queries Generated</span>
+      <span class="monolith-num" id="statTotalQueries">0</span>
+    </div>
+
+    <div class="metric-monolith-card">
+      <span class="metric-index-tag">04. HOSTILE ENTITIES</span>
+      <span class="metric-label-text">Suspicious Indicators</span>
+      <span class="monolith-num text-blood" id="statSuspiciousUrls">0</span>
+    </div>
+  </div>
+
+  <!-- Investigation Timeline Waveform & Risk Dispersion -->
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-lg-8">
+      <div class="waveform-container">
+        <div class="waveform-header">
+          <span class="font-headline fs-5 text-bone text-uppercase">// INVESTIGATION FREQUENCY TIMELINE</span>
+          <span class="font-mono text-ash small">7-DAY ACTIVITY CYCLE</span>
+        </div>
+        <div style="position: relative; height: 260px;">
+          <canvas id="activityTimelineChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="waveform-container h-100">
+        <div class="waveform-header">
+          <span class="font-headline fs-5 text-bone text-uppercase">// THREAT DISPERSION</span>
+          <span class="font-mono text-ash small">RISK SPECTRUM</span>
+        </div>
+        <div style="position: relative; height: 210px;">
+          <canvas id="riskDistributionChart"></canvas>
+        </div>
+        <div class="d-flex justify-content-around mt-3 pt-2 border-top border-hairline small font-mono text-center">
+          <div><i class="bi bi-circle-fill" style="color: var(--threat-low);"></i> Low: <span id="labelLowRisk" class="text-bone fw-bold">0</span></div>
+          <div><i class="bi bi-circle-fill" style="color: var(--threat-med);"></i> Med: <span id="labelMedRisk" class="text-bone fw-bold">0</span></div>
+          <div><i class="bi bi-circle-fill" style="color: var(--threat-critical);"></i> Critical: <span id="labelHighRisk" class="text-bone fw-bold">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block modals %}
+<!-- Dossier Modal for Direct Inspection -->
+<div class="modal fade" id="viewDossierModal" tabindex="-1" aria-labelledby="dossierModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content horror-card">
+      <div class="d-flex justify-content-between align-items-center border-bottom border-hairline pb-3 mb-3">
+        <h5 class="font-headline text-blood mb-0" id="dossierModalTitle">
+          <i class="bi bi-shield-exclamation text-blood me-1"></i> Investigation Dossier
+        </h5>
+        <button type="button" class="close-index-btn" data-bs-dismiss="modal" onclick="closeModalById('viewDossierModal')" aria-label="Close">CLOSE</button>
+      </div>
+      <div class="modal-body p-0" id="dossierModalBody">
+        <div class="text-center py-4 text-ash font-mono">Loading classified dossier...</div>
+      </div>
+      <div class="border-top border-hairline pt-3 mt-3 d-flex justify-content-end gap-2">
+        <button type="button" class="editorial-btn editorial-btn-outline btn-sm" data-bs-dismiss="modal" onclick="closeModalById('viewDossierModal')">Dismiss</button>
+        <a id="dossierDownloadPdfBtn" href="#" class="editorial-btn btn-sm" target="_blank">
+          <i class="bi bi-file-earmark-pdf"></i> Download PDF Dossier
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+  function fillAndExecute(targetUrl) {
+    const input = document.getElementById("quickTargetInput");
+    if (input) {
+      input.value = targetUrl;
+      const btn = document.getElementById("quickLaunchBtn");
+      if (btn) btn.click();
+    }
+  }
+
+  // Populate Right Column Vertical Recent Investigations Feed
+  async function loadHeroRecentFeed() {
+    const feed = document.getElementById("recentInvestigationsFeed");
+    if (!feed) return;
+
+    try {
+      const resp = await fetch("/api/history?limit=6");
+      const json = await resp.json();
+      if (json.success && json.records && json.records.length > 0) {
+        feed.innerHTML = json.records.map(r => {
+          let riskClass = "low";
+          if (r.risk_level === "High" || r.risk_level === "Critical") riskClass = "critical";
+          else if (r.risk_level === "Medium") riskClass = "medium";
+
+          return `
+            <div class="activity-feed-node" onclick="viewInvestigationDossier(${r.id})">
+              <div class="node-header">
+                <span class="node-target font-mono" title="${r.target}">${r.target}</span>
+                <span class="threat-status-tag ${riskClass}" style="font-size:0.65rem; padding:0.15rem 0.45rem;">
+                  ${r.risk_score}/100
+                </span>
+              </div>
+              <div class="node-summary">${r.summary || "Investigation completed."}</div>
+              <div class="d-flex justify-content-between align-items-center mt-1">
+                <span class="node-time">${r.created_at}</span>
+                <span class="text-blood font-mono" style="font-size:0.7rem;">INSPECT &rarr;</span>
+              </div>
+            </div>
+          `;
+        }).join("");
+      } else {
+        feed.innerHTML = `<div class="text-ash small text-center py-4 font-mono">No investigations recorded yet.</div>`;
+      }
+    } catch (e) {
+      feed.innerHTML = `<div class="text-danger small py-3 font-mono">Failed to load feed.</div>`;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    loadHeroRecentFeed();
+  });
+</script>
+{% endblock %}

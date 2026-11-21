@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <!-- Blood & Crimson Gradients -->
+    <linearGradient id="bloodGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E32636"/>
+      <stop offset="50%" stop-color="#B5121B"/>
+      <stop offset="100%" stop-color="#650B12"/>
+    </linearGradient>
+
+    <linearGradient id="shieldFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1A1112"/>
+      <stop offset="60%" stop-color="#0E090A"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </linearGradient>
+
+    <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E32636" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#B5121B" stop-opacity="0.6"/>
+      <stop offset="75%" stop-color="#650B12" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="coreGaze" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="25%" stop-color="#E32636"/>
+      <stop offset="85%" stop-color="#650B12"/>
+      <stop offset="100%" stop-color="#110506"/>
+    </radialGradient>
+
+    <!-- Distressed / Noise Filter for Metallic Grime -->
+    <filter id="distressedGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background Ambience -->
+  <circle cx="100" cy="100" r="92" fill="#050505" stroke="#351316" stroke-width="1.5" stroke-dasharray="4,8" opacity="0.6"/>
+
+  <!-- Containment Ring -->
+  <circle cx="100" cy="100" r="82" fill="none" stroke="#650B12" stroke-width="2" opacity="0.8"/>
+  <circle cx="100" cy="100" r="82" fill="none" stroke="#E32636" stroke-width="1.5" stroke-dasharray="8, 24" opacity="0.9"/>
+
+  <!-- Occult Containment Marks / Tick Marks -->
+  <line x1="100" y1="10" x2="100" y2="24" stroke="#B5121B" stroke-width="2.5"/>
+  <line x1="100" y1="176" x2="100" y2="190" stroke="#B5121B" stroke-width="2.5"/>
+  <line x1="10" y1="100" x2="24" y2="100" stroke="#B5121B" stroke-width="2.5"/>
+  <line x1="176" y1="100" x2="190" y2="100" stroke="#B5121B" stroke-width="2.5"/>
+
+  <!-- Abstract Gothic Shield -->
+  <path d="M100 24 
+           L162 48 
+           L154 116 
+           L100 178 
+           L46 116 
+           L38 48 Z" 
+        fill="url(#shieldFill)" 
+        stroke="url(#bloodGradient)" 
+        stroke-width="3.5" 
+        stroke-linejoin="round"
+        filter="url(#distressedGlow)"/>
+
+  <!-- Inner Inverted Shield Facet -->
+  <path d="M100 38 
+           L148 58 
+           L142 112 
+           L100 162 
+           L58 112 
+           L52 58 Z" 
+        fill="#0B0708" 
+        stroke="#351316" 
+        stroke-width="1.5"/>
+
+  <!-- Eerie Eye Glow Aura -->
+  <ellipse cx="100" cy="100" rx="46" ry="32" fill="url(#eyeGlow)"/>
+
+  <!-- Surveillance Eye Outline (Curved almond shape) -->
+  <path d="M54 100 Q100 60 146 100 Q100 140 54 100 Z" 
+        fill="#070405" 
+        stroke="#E32636" 
+        stroke-width="2.5" 
+        stroke-linecap="round"/>
+
+  <!-- Inner Eye Ring -->
+  <ellipse cx="100" cy="100" rx="26" ry="26" fill="url(#coreGaze)" stroke="#351316" stroke-width="1.5"/>
+
+  <!-- Demonic / Supernatural Slit Pupil -->
+  <ellipse cx="100" cy="100" rx="5.5" ry="18" fill="#000000"/>
+  <circle cx="98" cy="95" r="2.5" fill="#FFFFFF" opacity="0.85"/>
+
+  <!-- Crosshairs / Containment Vectors -->
+  <line x1="100" y1="62" x2="100" y2="76" stroke="#E32636" stroke-width="2" stroke-linecap="round"/>
+  <line x1="100" y1="124" x2="100" y2="138" stroke="#E32636" stroke-width="2" stroke-linecap="round"/>
+  <line x1="62" y1="100" x2="76" y2="100" stroke="#E32636" stroke-width="2" stroke-linecap="round"/>
+  <line x1="124" y1="100" x2="138" y2="100" stroke="#E32636" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Subtly Distressed Diagonal Scratch Marks -->
+  <path d="M72 56 L88 72 M126 130 L136 142 M66 128 L74 136" stroke="#B5121B" stroke-width="1" opacity="0.6"/>
+</svg>

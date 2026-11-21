@@ -1,0 +1,415 @@
+{% extends "base.html" %}
+
+{% block title %}Investigation Database | SENTINEL-X{% endblock %}
+{% block breadcrumb %}06 // DOSSIER ARCHIVES{% endblock %}
+
+{% block content %}
+<!-- Top Cinematic Horror Hero Banner -->
+<div class="horror-module-banner mb-4">
+  <div class="module-banner-backdrop">
+    <img src="{{ url_for('static', filename='images/horror_archive_vault.jpg') }}" alt="Haunted Archive Vault" class="module-banner-img ken-burns-subtle">
+    <div class="module-banner-overlay"></div>
+  </div>
+  <div class="module-banner-content">
+    <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
+      <div>
+        <div class="vertical-classified-tag mb-1">ARCHIVE REGISTRY // LOCAL PERSISTENCE SYSTEM</div>
+        <h1 class="horror-glitch horror-font mb-1"><i class="bi bi-archive-fill text-blood"></i> CLASSIFIED DOSSIER ARCHIVES</h1>
+        <p class="text-ash mb-0" style="max-width: 650px;">Search, filter, and audit all historic security scans, OSINT queries, and risk dossiers stored in local SQLite.</p>
+      </div>
+      <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+        <span class="system-telemetry-pill">
+          <i class="bi bi-database text-blood"></i> WAL ENCRYPTED
+        </span>
+        <button class="editorial-btn-outline btn-sm py-1.5 px-3 text-danger border-danger" data-bs-toggle="modal" data-bs-target="#clearHistoryModal">
+          <i class="bi bi-trash3 text-danger"></i> Purge All Records
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter & Search Controls -->
+<div class="horror-card mb-4" style="border-left: 3px solid var(--blood-crimson);">
+  <div class="row g-3 align-items-center">
+    <div class="col-12 col-lg-5">
+      <div class="input-group">
+        <span class="input-group-text bg-dark border-horror text-blood"><i class="bi bi-search"></i></span>
+        <input type="text" id="historySearchInput" class="form-control font-monospace" placeholder="Filter target URL, domain, or summary keyword..." oninput="debounceHistorySearch()">
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <select id="historyFilterModule" class="form-select font-monospace" onchange="loadFullHistory()">
+        <option value="all">All Modules</option>
+        <option value="threat_scan">Threat Scanner (VirusTotal)</option>
+        <option value="url_analysis">URL Threat Forensics</option>
+        <option value="domain_intelligence">Domain Intelligence</option>
+        <option value="osint_query">OSINT Matrices</option>
+        <option value="redirect_inspection">Trajectory Inspector</option>
+      </select>
+    </div>
+
+    <div class="col-6 col-lg-2">
+      <select id="historyFilterRiskLevel" class="form-select font-monospace" onchange="loadFullHistory()">
+        <option value="all">All Risk Levels</option>
+        <option value="Low">Low Risk</option>
+        <option value="Medium">Medium Risk</option>
+        <option value="High">High / Critical</option>
+        <option value="Info">Info (OSINT)</option>
+      </select>
+    </div>
+
+    <div class="col-12 col-lg-2 text-lg-end">
+      <button class="horror-btn horror-btn-outline w-100 py-2" onclick="loadFullHistory()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- History Table Card -->
+<div class="horror-card">
+  <div class="horror-card-header">
+    <h5 class="horror-card-title text-blood">
+      <i class="bi bi-file-earmark-medical text-blood"></i> Recorded Telemetry Dossiers
+    </h5>
+    <span class="badge font-monospace text-blood" id="historyTotalRecordsBadge" style="background: rgba(181,18,27,0.15); border:1px solid var(--border-hairline);">0 Records</span>
+  </div>
+
+  <div class="horror-table-container">
+    <table class="horror-table">
+      <thead>
+        <tr>
+          <th style="width: 90px;">Dossier</th>
+          <th>Subject / Target Identifier</th>
+          <th style="width: 130px;">Vector</th>
+          <th style="width: 150px;">Assessed Threat</th>
+          <th>Summary Findings</th>
+          <th style="width: 170px;">Timestamp</th>
+          <th class="text-end" style="width: 160px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="historyFullTableBody">
+        <tr>
+          <td colspan="7" class="text-center py-5 text-ash">
+            <i class="bi bi-arrow-repeat spin fs-4 d-block mb-2 text-blood"></i>
+            Querying classified archives...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Modal: Clear History Confirmation -->
+<div class="modal fade" id="clearHistoryModal" tabindex="-1" aria-labelledby="clearHistoryModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content horror-card border-danger">
+      <div class="modal-header border-bottom border-horror">
+        <h5 class="modal-title text-danger font-headline" id="clearHistoryModalTitle">
+          <i class="bi bi-exclamation-triangle-fill"></i> PURGE INVESTIGATION ARCHIVES
+        </h5>
+        <button type="button" class="close-index-btn" data-bs-dismiss="modal" onclick="closeModalById('clearHistoryModal')" aria-label="Close">CLOSE</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-ash mb-0">Are you certain you wish to purge all recorded investigations, audit metrics, and activity logs? This action is permanent and classified records cannot be retrieved.</p>
+      </div>
+      <div class="modal-footer border-top border-horror">
+        <button type="button" class="editorial-btn-outline btn-sm py-1.5 px-3" data-bs-dismiss="modal" onclick="closeModalById('clearHistoryModal')">Cancel</button>
+        <button type="button" class="editorial-btn btn-sm py-1.5 px-3" onclick="purgeHistoryAction()">
+          <i class="bi bi-trash3"></i> Yes, Purge All Records
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: View Full Dossier -->
+<div class="modal fade" id="viewFullDossierModal" tabindex="-1" aria-labelledby="fullDossierTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content horror-card">
+      <div class="modal-header border-bottom border-horror">
+        <h5 class="modal-title horror-card-title text-blood" id="fullDossierTitle">
+          <i class="bi bi-file-earmark-lock2-fill text-blood"></i> Investigation Dossier
+        </h5>
+        <button type="button" class="close-index-btn" data-bs-dismiss="modal" onclick="closeModalById('viewFullDossierModal')" aria-label="Close">CLOSE</button>
+      </div>
+      <div class="modal-body p-4" id="fullDossierBody">
+        <div class="text-center py-4 text-ash">Loading dossier...</div>
+      </div>
+      <div class="modal-footer border-top border-horror">
+        <button type="button" class="editorial-btn-outline btn-sm py-1.5 px-3" data-bs-dismiss="modal" onclick="closeModalById('viewFullDossierModal')">Close</button>
+        <a id="fullDossierPdfBtn" href="#" class="editorial-btn btn-sm py-1.5 px-3" target="_blank">
+          <i class="bi bi-file-earmark-pdf"></i> Download Vector PDF
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let searchDebounceTimeout = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchParam = urlParams.get("search");
+  if (searchParam) {
+    document.getElementById("historySearchInput").value = searchParam;
+  }
+  loadFullHistory();
+});
+
+function debounceHistorySearch() {
+  clearTimeout(searchDebounceTimeout);
+  searchDebounceTimeout = setTimeout(loadFullHistory, 350);
+}
+
+async function loadFullHistory() {
+  const tbody = document.getElementById("historyFullTableBody");
+  const search = document.getElementById("historySearchInput")?.value.trim() || "";
+  const moduleFilter = document.getElementById("historyFilterModule")?.value || "all";
+  const riskFilter = document.getElementById("historyFilterRiskLevel")?.value || "all";
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="7" class="text-center py-5 text-ash">
+        <i class="bi bi-arrow-repeat spin fs-4 d-block mb-2 text-blood"></i>
+        Querying classified archives...
+      </td>
+    </tr>
+  `;
+
+  try {
+    const url = `/api/history?limit=100&type=${moduleFilter}&risk=${riskFilter}&search=${encodeURIComponent(search)}`;
+    const resp = await fetch(url);
+    const json = await resp.json();
+
+    if (json.success && json.records) {
+      document.getElementById("historyTotalRecordsBadge").innerText = `${json.records.length} Records`;
+
+      if (json.records.length > 0) {
+        tbody.innerHTML = json.records.map(r => {
+          let typeBadge = `<span class="badge font-monospace text-blood" style="background:#171313; border:1px solid #351316;">URL</span>`;
+          if (r.investigation_type === "threat_scan") {
+            typeBadge = `<span class="badge font-monospace" style="background:rgba(227,38,54,0.18); color:#E32636; border:1px solid var(--blood-crimson);">SCANNER</span>`;
+          } else if (r.investigation_type === "domain_intelligence") {
+            typeBadge = `<span class="badge font-monospace" style="background:#171313; color:#C69B42; border:1px solid #351316;">DOMAIN</span>`;
+          } else if (r.investigation_type === "osint_query") {
+            typeBadge = `<span class="badge font-monospace text-blood" style="background:#171313; border:1px solid #650B12;">OSINT</span>`;
+          } else if (r.investigation_type === "redirect_inspection") {
+            typeBadge = `<span class="badge font-monospace" style="background:#171313; color:#E26B35; border:1px solid #351316;">REDIRECT</span>`;
+          }
+
+          let riskClass = "low";
+          if (r.risk_level === "High" || r.risk_level === "Critical") riskClass = "critical";
+          else if (r.risk_level === "Medium") riskClass = "medium";
+          else if (r.risk_level === "Info") riskClass = "low";
+
+          return `
+            <tr>
+              <td class="font-monospace text-blood small">#DOS-${String(r.id).padStart(4, "0")}</td>
+              <td>
+                <div class="fw-semibold text-truncate text-bone font-monospace" style="max-width: 280px;" title="${r.target}">
+                  ${r.target}
+                </div>
+              </td>
+              <td>${typeBadge}</td>
+              <td>
+                <span class="risk-badge ${riskClass}">
+                  ${r.risk_level} (${r.risk_score}/100)
+                </span>
+              </td>
+              <td>
+                <div class="text-ash small text-truncate" style="max-width: 320px;" title="${r.summary}">
+                  ${r.summary || "Complete"}
+                </div>
+              </td>
+              <td class="font-monospace small text-dim" style="white-space:nowrap;">${r.created_at}</td>
+              <td class="text-end" style="white-space:nowrap;">
+                <button class="editorial-btn-outline btn-sm py-1 px-2.5 me-1" onclick="viewDetailedDossier(${r.id})" title="View Full Dossier">
+                  <i class="bi bi-eye"></i> View
+                </button>
+                <a href="/api/reports/pdf/${r.id}" class="editorial-btn-outline btn-sm py-1 px-2 me-1" title="Download PDF">
+                  <i class="bi bi-file-earmark-pdf"></i>
+                </a>
+                <button class="btn btn-outline-danger btn-sm py-1 px-2" onclick="deleteHistoryItem(${r.id})" title="Purge Record">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      } else {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-5 text-ash">
+              <i class="bi bi-inbox fs-2 d-block mb-2 text-dim"></i>
+              No investigation records found matching criteria.
+            </td>
+          </tr>
+        `;
+      }
+    }
+  } catch (err) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center py-4 text-danger">
+          Error querying database: ${err.message}
+        </td>
+      </tr>
+    `;
+  }
+}
+
+async function viewDetailedDossier(id) {
+  const modalBody = document.getElementById("fullDossierBody");
+  const modalTitle = document.getElementById("fullDossierTitle");
+  const pdfBtn = document.getElementById("fullDossierPdfBtn");
+
+  if (pdfBtn) pdfBtn.href = `/api/reports/pdf/${id}`;
+
+  const modal = new bootstrap.Modal(document.getElementById("viewFullDossierModal"));
+  modal.show();
+
+  modalBody.innerHTML = `<div class="text-center py-4 text-ash"><i class="bi bi-arrow-repeat spin fs-4 d-block mb-2 text-blood"></i>Loading dossier #${id}...</div>`;
+
+  try {
+    const resp = await fetch(`/api/history/${id}`);
+    const json = await resp.json();
+
+    if (json.success && json.record) {
+      const rec = json.record;
+      modalTitle.innerHTML = `<i class="bi bi-shield-exclamation text-blood"></i> Dossier #DOS-${String(rec.id).padStart(4, "0")} &bull; ${rec.target}`;
+      const details = rec.details || {};
+      const risk = details.risk_assessment || { score: rec.risk_score, level: rec.risk_level, indicators: [] };
+
+      let riskColor = '#659B78';
+      if (rec.risk_score >= 60) riskColor = '#E32636';
+      else if (rec.risk_score >= 30) riskColor = '#C69B42';
+
+      modalBody.innerHTML = `
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <div class="horror-inset-box p-3 rounded">
+              <span class="text-ash small text-uppercase font-monospace">Target Host</span>
+              <div class="fw-bold font-monospace text-truncate text-blood mt-1">${rec.target}</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="horror-inset-box p-3 rounded">
+              <span class="text-ash small text-uppercase font-monospace">Assessed Threat Score</span>
+              <div class="fw-bold fs-4 mt-1 font-headline" style="color: ${riskColor};">
+                ${rec.risk_score} / 100 (${rec.risk_level})
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="horror-inset-box p-3 rounded">
+              <span class="text-ash small text-uppercase font-monospace">Investigation Timestamp</span>
+              <div class="fw-bold font-monospace text-ash mt-1">${rec.created_at}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="horror-inset-box p-3 rounded mb-3">
+          <h6 class="text-blood mb-2 font-monospace fw-bold"><i class="bi bi-card-text text-blood"></i> Forensic Findings Summary</h6>
+          <p class="text-bone small mb-0">${rec.summary}</p>
+        </div>
+
+        ${details.detection_ratio ? `
+          <div class="horror-inset-box p-3 rounded mb-3 d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-ash small font-monospace text-uppercase">VirusTotal Consensus Grid</span>
+              <div class="fw-bold font-headline fs-5 text-bone">${details.detection_ratio.display} Security Vendors Flagged Target</div>
+            </div>
+            <span class="badge ${rec.risk_score >= 60 ? 'bg-danger' : rec.risk_score >= 25 ? 'bg-warning text-dark' : 'bg-success'} font-monospace px-3 py-2">
+              VERDICT: ${details.overall_verdict || rec.risk_level.toUpperCase()}
+            </span>
+          </div>
+        ` : ''}
+
+        ${(details.attack_findings && details.attack_findings.length > 0) ? `
+          <h6 class="text-blood mb-2 font-monospace fw-bold"><i class="bi bi-shield-x text-blood"></i> Attack Vector Forensics (${details.attack_findings.length})</h6>
+          <div class="d-flex flex-column gap-2 mb-3">
+            ${details.attack_findings.map(af => `
+              <div class="horror-inset-box p-2.5 rounded d-flex justify-content-between align-items-start gap-2">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge ${af.severity === 'Critical' || af.severity === 'High' ? 'bg-danger' : 'bg-warning text-dark'}">${af.severity}</span>
+                    <strong class="text-bone small">${af.finding || af.vector}</strong>
+                    <span class="badge bg-dark text-muted font-monospace">${af.category || 'Vector'}</span>
+                  </div>
+                  <div class="text-ash small">${af.description || af.detail}</div>
+                </div>
+                <span class="badge bg-secondary font-monospace text-blood" style="border:1px solid #351316;">+${af.points || 25} pts</span>
+              </div>
+            `).join("")}
+          </div>
+        ` : (risk.indicators && risk.indicators.length > 0) ? `
+          <h6 class="text-blood mb-2 font-monospace fw-bold"><i class="bi bi-shield-exclamation text-blood"></i> Triggered Threat Indicators (${risk.indicators.length})</h6>
+          <div class="d-flex flex-column gap-2 mb-3">
+            ${risk.indicators.map(ind => `
+              <div class="horror-inset-box p-2.5 rounded d-flex justify-content-between align-items-start gap-2">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge ${ind.severity === 'Critical' || ind.severity === 'High' ? 'bg-danger' : ind.severity === 'Medium' ? 'bg-warning text-dark' : 'bg-secondary text-bone'}">${ind.severity}</span>
+                    <strong class="text-bone small">${ind.title}</strong>
+                  </div>
+                  <div class="text-ash small">${ind.description}</div>
+                </div>
+                <span class="badge bg-secondary font-monospace text-blood" style="border:1px solid #351316;">+${ind.points} pts</span>
+              </div>
+            `).join("")}
+          </div>
+        ` : `
+          <div class="horror-inset-box p-3 rounded text-ash small text-center mb-3">
+            No anomalous risk indicators triggered during automated evaluation.
+          </div>
+        `}
+      `;
+    }
+  } catch (err) {
+    modalBody.innerHTML = `<div class="text-danger p-3">Failed to load dossier details: ${err.message}</div>`;
+  }
+}
+
+async function deleteHistoryItem(id) {
+  if (!confirm(`Permanently remove dossier #${id} from local intelligence storage?`)) return;
+
+  try {
+    const resp = await fetch(`/api/history/${id}`, { method: "DELETE" });
+    const json = await resp.json();
+    if (json.success) {
+      showHorrorToast(`Dossier #${id} purged.`, "success");
+      loadFullHistory();
+    } else {
+      showHorrorToast(json.error || "Failed to purge record.", "danger");
+    }
+  } catch (err) {
+    showHorrorToast(`Delete failed: ${err.message}`, "danger");
+  }
+}
+
+async function purgeHistoryAction() {
+  const modalEl = document.getElementById("clearHistoryModal");
+  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+  if (modalInstance) modalInstance.hide();
+
+  try {
+    const resp = await fetch("/api/history/clear", { method: "POST" });
+    const json = await resp.json();
+    if (json.success) {
+      showHorrorToast("All intelligence archives purged successfully.", "success");
+      loadFullHistory();
+    }
+  } catch (err) {
+    showHorrorToast(`Purge failed: ${err.message}`, "danger");
+  }
+}
+</script>
+{% endblock %}

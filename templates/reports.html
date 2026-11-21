@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Investigation Reports &amp; Exports | SENTINEL-X{% endblock %}
+{% block breadcrumb %}07 // DOSSIERS &amp; EXPORTS{% endblock %}
+
+{% block content %}
+<!-- Top Cinematic Horror Hero Banner -->
+<div class="horror-module-banner mb-4">
+  <div class="module-banner-backdrop">
+    <img src="{{ url_for('static', filename='images/horror_case_files.jpg') }}" alt="Classified Case Files" class="module-banner-img ken-burns-subtle">
+    <div class="module-banner-overlay"></div>
+  </div>
+  <div class="module-banner-content">
+    <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
+      <div>
+        <div class="vertical-classified-tag mb-1">EXPORT ENGINE // FORENSIC REPORT GENERATOR</div>
+        <h1 class="horror-glitch horror-font mb-1"><i class="bi bi-file-earmark-bar-graph text-blood"></i> CLASSIFIED INTELLIGENCE DOSSIERS</h1>
+        <p class="text-ash mb-0" style="max-width: 650px;">Compile, review, and export classified forensic intelligence dossiers in cryptographic vector PDF and JSON formats.</p>
+      </div>
+      <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+        <span class="system-telemetry-pill">
+          <i class="bi bi-file-earmark-pdf text-blood"></i> REPORTLAB 4.X
+        </span>
+        <span class="system-telemetry-pill">
+          <i class="bi bi-filetype-json text-ash"></i> JSON SCHEMA RFC-8259
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Report Engine Metric Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-12 col-md-4">
+    <div class="stat-card" style="border-left: 3px solid var(--blood-crimson);">
+      <div class="stat-icon-wrapper blood">
+        <i class="bi bi-file-earmark-pdf-fill"></i>
+      </div>
+      <div class="stat-details">
+        <span class="stat-value text-blood">PDF 1.7</span>
+        <span class="stat-label">Vector PDF Dossier Engine</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="stat-card" style="border-left: 3px solid #650B12;">
+      <div class="stat-icon-wrapper blood">
+        <i class="bi bi-file-code-fill"></i>
+      </div>
+      <div class="stat-details">
+        <span class="stat-value text-bone">JSON</span>
+        <span class="stat-label">Structured Telemetry Schema</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="stat-card" style="border-left: 3px solid var(--blood-bright);">
+      <div class="stat-icon-wrapper blood">
+        <i class="bi bi-shield-check"></i>
+      </div>
+      <div class="stat-details">
+        <span class="stat-value text-blood" id="reportsCountValue">0</span>
+        <span class="stat-label">Compiled Dossiers in Registry</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dossiers Catalog Card -->
+<div class="horror-card">
+  <div class="horror-card-header flex-wrap gap-2">
+    <h5 class="horror-card-title text-blood">
+      <i class="bi bi-archive-fill text-blood"></i> Available Intelligence Dossiers
+    </h5>
+    <div class="d-flex align-items-center gap-2">
+      <div class="input-group input-group-sm" style="width: 240px;">
+        <span class="input-group-text bg-dark border-horror text-blood"><i class="bi bi-search"></i></span>
+        <input type="text" id="reportSearchInput" class="form-control font-monospace" placeholder="Filter by target..." oninput="filterReportsTable()">
+      </div>
+      <button class="horror-btn horror-btn-outline btn-sm py-1.5 px-3" onclick="loadReportsData()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <div class="horror-table-container">
+    <table class="horror-table">
+      <thead>
+        <tr>
+          <th style="width: 110px;">Dossier #</th>
+          <th>Subject / Target Identifier</th>
+          <th style="width: 160px;">Vector</th>
+          <th style="width: 160px;">Assessed Threat</th>
+          <th style="width: 170px;">Timestamp</th>
+          <th class="text-end" style="width: 180px;">Export Actions</th>
+        </tr>
+      </thead>
+      <tbody id="reportsTableBody">
+        <tr>
+          <td colspan="6" class="text-center py-5 text-ash">
+            <i class="bi bi-arrow-repeat spin fs-4 d-block mb-2 text-blood"></i>
+            Loading dossiers...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allReports = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadReportsData();
+});
+
+async function loadReportsData() {
+  const tbody = document.getElementById("reportsTableBody");
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="6" class="text-center py-5 text-ash">
+        <i class="bi bi-arrow-repeat spin fs-4 d-block mb-2 text-blood"></i>
+        Compiling available dossiers...
+      </td>
+    </tr>
+  `;
+
+  try {
+    const resp = await fetch("/api/history?limit=100");
+    const json = await resp.json();
+
+    if (json.success && json.records) {
+      allReports = json.records;
+      document.getElementById("reportsCountValue").innerText = allReports.length;
+      renderReportsTable(allReports);
+    }
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Error: ${err.message}</td></tr>`;
+  }
+}
+
+function renderReportsTable(records) {
+  const tbody = document.getElementById("reportsTableBody");
+
+  if (records && records.length > 0) {
+    tbody.innerHTML = records.map(r => {
+      let riskClass = "low";
+      if (r.risk_level === "High" || r.risk_level === "Critical") riskClass = "critical";
+      else if (r.risk_level === "Medium") riskClass = "medium";
+      else if (r.risk_level === "Info") riskClass = "low";
+
+      return `
+        <tr>
+          <td class="font-monospace text-blood small">#DOS-${String(r.id).padStart(4, "0")}</td>
+          <td>
+            <div class="fw-semibold text-truncate text-bone font-monospace" style="max-width: 320px;" title="${r.target}">
+              ${r.target}
+            </div>
+          </td>
+          <td>
+            <span class="badge font-monospace text-blood text-uppercase" style="background:#171313; border:1px solid #351316; font-size:0.72rem;">
+              ${r.investigation_type.replace("_", " ")}
+            </span>
+          </td>
+          <td>
+            <span class="risk-badge ${riskClass}">
+              ${r.risk_level} (${r.risk_score}/100)
+            </span>
+          </td>
+          <td class="font-monospace small text-dim" style="white-space:nowrap;">${r.created_at}</td>
+          <td class="text-end" style="white-space:nowrap;">
+            <a href="/api/reports/pdf/${r.id}" class="editorial-btn btn-sm py-1 px-3 me-1" title="Download Vector PDF Dossier">
+              <i class="bi bi-file-earmark-pdf"></i> PDF
+            </a>
+            <a href="/api/reports/json/${r.id}" class="editorial-btn-outline btn-sm py-1 px-3" target="_blank" title="Export Raw JSON Structure">
+              <i class="bi bi-file-code"></i> JSON
+            </a>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  } else {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center py-5 text-ash">
+          <i class="bi bi-inbox fs-2 d-block mb-2 text-dim"></i>
+          No dossiers compiled yet. Conduct an investigation in URL Forensics or Domain Intel to create reports.
+        </td>
+      </tr>
+    `;
+  }
+}
+
+function filterReportsTable() {
+  const q = document.getElementById("reportSearchInput").value.toLowerCase().trim();
+  const filtered = allReports.filter(r => r.target.toLowerCase().includes(q) || r.investigation_type.toLowerCase().includes(q));
+  renderReportsTable(filtered);
+}
+</script>
+{% endblock %}
